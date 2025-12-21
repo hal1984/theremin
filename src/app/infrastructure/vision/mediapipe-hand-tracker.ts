@@ -25,6 +25,10 @@ export class MediaPipeHandTracker implements HandTrackingPort {
 
   async start(options: HandTrackingStartOptions): Promise<void> {
     if (this.running) {
+      if (this.stream && this.video !== options.video) {
+        this.video = options.video;
+        this.attachStreamToVideo(this.video, this.stream);
+      }
       return;
     }
 
@@ -36,6 +40,7 @@ export class MediaPipeHandTracker implements HandTrackingPort {
     try {
       await this.ensureLandmarker();
       await this.attachCamera(this.video, this.config);
+      await this.waitForVideoReady(this.video);
       this.loop(performance.now());
     } catch (error) {
       this.running = false;
@@ -59,6 +64,8 @@ export class MediaPipeHandTracker implements HandTrackingPort {
     if (this.video) {
       this.video.srcObject = null;
     }
+
+    this.video = null;
   }
 
   isRunning(): boolean {
@@ -104,16 +111,28 @@ export class MediaPipeHandTracker implements HandTrackingPort {
     });
 
     this.stream = stream;
+    this.attachStreamToVideo(video, stream);
+  }
+
+  private attachStreamToVideo(video: HTMLVideoElement, stream: MediaStream): void {
     video.srcObject = stream;
     video.autoplay = true;
     video.muted = true;
     video.playsInline = true;
-
-    await video.play();
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.play().catch(() => {
+      // Ignore autoplay errors; user interaction can retrigger playback.
+    });
   }
 
   private loop = (now: number): void => {
     if (!this.running || !this.landmarker || !this.video) {
+      return;
+    }
+
+    if (this.video.videoWidth === 0 || this.video.videoHeight === 0) {
+      this.rafId = requestAnimationFrame(this.loop);
       return;
     }
 
@@ -125,12 +144,47 @@ export class MediaPipeHandTracker implements HandTrackingPort {
 
     this.lastFrameTime = now;
 
-    const result = this.landmarker.detectForVideo(this.video, now);
-    const frame = this.mapResult(result, now);
-    this.onFrame?.(frame);
+    try {
+      const result = this.landmarker.detectForVideo(this.video, now);
+      const frame = this.mapResult(result, now);
+      this.onFrame?.(frame);
+    } catch (error) {
+      this.running = false;
+      this.onError?.(error);
+      return;
+    }
 
     this.rafId = requestAnimationFrame(this.loop);
   };
+
+  private async waitForVideoReady(video: HTMLVideoElement): Promise<void> {
+    if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
+      return;
+    }
+
+    await new Promise<void>((resolve) => {
+      let resolved = false;
+      const done = () => {
+        if (resolved) {
+          return;
+        }
+        resolved = true;
+        video.removeEventListener('loadedmetadata', done);
+        video.removeEventListener('loadeddata', done);
+        resolve();
+      };
+
+      const timeoutId = window.setTimeout(done, 1500);
+
+      const finish = () => {
+        window.clearTimeout(timeoutId);
+        done();
+      };
+
+      video.addEventListener('loadedmetadata', finish, { once: true });
+      video.addEventListener('loadeddata', finish, { once: true });
+    });
+  }
 
   private mapResult(result: HandLandmarkerResult, timestampMs: number): HandTrackingFrame {
     const hands: HandPose[] = result.landmarks.map((landmarks, index) => {

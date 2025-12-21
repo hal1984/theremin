@@ -5,78 +5,124 @@
   {{ 'COMMON.SKIP_TO_CONTENT' | translate }}
 </a>
 
-<div class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-  <header class="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-    <div>
-      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-        {{ 'APP.TITLE' | translate }}
-      </p>
-      <h1 class="text-xl font-semibold text-slate-900">
-        {{ 'APP.SUBTITLE' | translate }}
-      </h1>
-    </div>
-    <nav class="flex flex-wrap items-center gap-2" [attr.aria-label]="'COMMON.NAV' | translate">
-      <a
-        class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
-        routerLink="/"
-        [class.border-slate-900]="isPlayActive()"
-        [class.text-slate-900]="isPlayActive()"
-      >
-        {{ 'NAV.PLAY' | translate }}
-      </a>
-      <a
-        class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
-        routerLink="/recordings"
-        routerLinkActive="border-slate-900 text-slate-900"
-      >
-        {{ 'NAV.RECORDINGS' | translate }}
-      </a>
-      <a
-        class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
-        routerLink="/settings"
-        routerLinkActive="border-slate-900 text-slate-900"
-      >
-        {{ 'NAV.SETTINGS' | translate }}
-      </a>
-      <a
-        class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
-        routerLink="/about"
-        routerLinkActive="border-slate-900 text-slate-900"
-      >
-        {{ 'NAV.ABOUT' | translate }}
-      </a>
-    </nav>
-    <div class="flex items-center gap-2" role="group" [attr.aria-label]="'COMMON.LANGUAGE' | translate">
+<div class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-6 pt-1 sm:px-6 lg:px-8">
+  @if (isNavOpen()) {
+    <button
+      type="button"
+      class="fixed inset-0 z-30 bg-slate-900/20 lg:hidden"
+      aria-hidden="true"
+      (click)="closeNav()"
+    ></button>
+  }
+
+  <div class="mt-1 flex flex-1 gap-6 lg:mt-8">
+    <aside
+      id="side-nav"
+      class="fixed inset-y-6 left-4 z-40 w-72 translate-x-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-lg transition-transform sm:left-6 lg:static lg:inset-auto lg:z-auto lg:translate-x-0 lg:pointer-events-auto lg:shadow-sm"
+      [class.-translate-x-full]="!isNavOpen()"
+      [class.translate-x-0]="isNavOpen()"
+      [class.pointer-events-none]="!isNavOpen()"
+      [class.pointer-events-auto]="isNavOpen()"
+      [attr.aria-label]="'COMMON.NAV' | translate"
+    >
+      <div class="hidden lg:block">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+          {{ 'APP.TITLE' | translate }}
+        </p>
+        <h1 class="text-xl font-semibold text-slate-900">
+          {{ 'APP.SUBTITLE' | translate }}
+        </h1>
+      </div>
       <button
         type="button"
-        class="rounded-full border px-3 py-1 text-xs font-semibold transition"
-        [class.border-slate-900]="currentLang() === 'es'"
-        [class.text-slate-900]="currentLang() === 'es'"
-        [class.border-slate-200]="currentLang() !== 'es'"
-        [class.text-slate-600]="currentLang() !== 'es'"
-        (click)="setLanguage('es')"
+        class="mb-4 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 lg:hidden"
+        [attr.aria-expanded]="isNavOpen()"
+        aria-controls="side-nav"
+        (click)="toggleNav()"
       >
-        {{ 'COMMON.LANG_ES' | translate }}
+        {{ (isNavOpen() ? 'COMMON.MENU_CLOSE' : 'COMMON.MENU_OPEN') | translate }}
       </button>
-      <button
-        type="button"
-        class="rounded-full border px-3 py-1 text-xs font-semibold transition"
-        [class.border-slate-900]="currentLang() === 'en'"
-        [class.text-slate-900]="currentLang() === 'en'"
-        [class.border-slate-200]="currentLang() !== 'en'"
-        [class.text-slate-600]="currentLang() !== 'en'"
-        (click)="setLanguage('en')"
-      >
-        {{ 'COMMON.LANG_EN' | translate }}
-      </button>
-    </div>
-  </header>
 
-  <main id="main" class="flex-1 py-8">
-    <router-outlet />
-  </main>
+      <nav class="mt-6 flex flex-col gap-2">
+        <a
+          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+          routerLink="/"
+          (click)="closeNav()"
+          [class.border-slate-900]="isPlayActive()"
+          [class.text-slate-900]="isPlayActive()"
+        >
+          {{ 'NAV.PLAY' | translate }}
+        </a>
+        <a
+          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+          routerLink="/recordings"
+          (click)="closeNav()"
+          routerLinkActive="border-slate-900 text-slate-900"
+        >
+          {{ 'NAV.RECORDINGS' | translate }}
+        </a>
+        <a
+          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+          routerLink="/settings"
+          (click)="closeNav()"
+          routerLinkActive="border-slate-900 text-slate-900"
+        >
+          {{ 'NAV.SETTINGS' | translate }}
+        </a>
+        <a
+          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+          routerLink="/about"
+          (click)="closeNav()"
+          routerLinkActive="border-slate-900 text-slate-900"
+        >
+          {{ 'NAV.ABOUT' | translate }}
+        </a>
+      </nav>
 
-  <footer class="text-sm text-slate-500">
-    <p>{{ 'APP.FOOTER' | translate }}</p>
-  </footer>
+      <div class="mt-6 flex items-center gap-2" role="group" [attr.aria-label]="'COMMON.LANGUAGE' | translate">
+        <button
+          type="button"
+          class="rounded-full border px-3 py-1 text-xs font-semibold transition"
+          [class.border-slate-900]="currentLang() === 'es'"
+          [class.text-slate-900]="currentLang() === 'es'"
+          [class.border-slate-200]="currentLang() !== 'es'"
+          [class.text-slate-600]="currentLang() !== 'es'"
+          (click)="setLanguage('es')"
+        >
+          {{ 'COMMON.LANG_ES' | translate }}
+        </button>
+        <button
+          type="button"
+          class="rounded-full border px-3 py-1 text-xs font-semibold transition"
+          [class.border-slate-900]="currentLang() === 'en'"
+          [class.text-slate-900]="currentLang() === 'en'"
+          [class.border-slate-200]="currentLang() !== 'en'"
+          [class.text-slate-600]="currentLang() !== 'en'"
+          (click)="setLanguage('en')"
+        >
+          {{ 'COMMON.LANG_EN' | translate }}
+        </button>
+      </div>
+
+      <footer class="mt-6 text-xs text-slate-500">
+        <p>{{ 'APP.FOOTER' | translate }}</p>
+      </footer>
+    </aside>
+
+    <main id="main" class="min-w-0 flex-1 py-2 lg:py-4">
+      <router-outlet />
+    </main>
+  </div>
+
+  @if (!isNavOpen()) {
+    <button
+      type="button"
+      class="fixed bottom-6 left-6 z-20 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-lg transition hover:border-slate-300 hover:text-slate-900 lg:hidden"
+      [attr.aria-expanded]="isNavOpen()"
+      aria-controls="side-nav"
+      (click)="toggleNav()"
+    >
+      {{ 'COMMON.MENU_OPEN' | translate }}
+    </button>
+  }
 </div>

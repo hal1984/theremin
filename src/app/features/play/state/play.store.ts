@@ -13,11 +13,34 @@ import { SettingsStore } from '../../settings/state/settings.store';
 type PlayStatus = 'idle' | 'active' | 'error';
 type CameraPermission = 'unknown' | 'granted' | 'denied';
 
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
+const hzToNote = (hz: number): string => {
+  if (!Number.isFinite(hz) || hz <= 0) {
+    return '--';
+  }
+
+  const midi = Math.round(69 + 12 * Math.log2(hz / 440));
+  const note = NOTE_NAMES[((midi % 12) + 12) % 12];
+  const octave = Math.floor(midi / 12) - 1;
+
+  return `${note}${octave}`;
+};
+
+const gainToDb = (gain: number): number => {
+  if (!Number.isFinite(gain) || gain <= 0.0001) {
+    return -60;
+  }
+
+  const db = 20 * Math.log10(gain);
+  return Math.round(Math.max(db, -60));
+};
+
 type PlayState = {
   status: PlayStatus;
   permission: CameraPermission;
   isRecording: boolean;
   isTracking: boolean;
+  isPreviewOn: boolean;
   pitchHz: number;
   gain: number;
   errorMessageKey: string | null;
@@ -29,6 +52,7 @@ const initialState: PlayState = {
   permission: 'unknown',
   isRecording: false,
   isTracking: false,
+  isPreviewOn: false,
   pitchHz: 440,
   gain: 0.2,
   errorMessageKey: null,
@@ -38,11 +62,12 @@ const initialState: PlayState = {
 export const PlayStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withComputed(({ status, permission, errorMessageKey, isRecording, isTracking }) => ({
+  withComputed(({ status, permission, errorMessageKey, isRecording, pitchHz, gain }) => ({
     isActive: computed(() => status() === 'active'),
     canStart: computed(() => status() !== 'active' && permission() !== 'denied'),
-    isTracking: computed(() => isTracking()),
     hasError: computed(() => errorMessageKey() !== null),
+    pitchNoteLabel: computed(() => hzToNote(pitchHz())),
+    volumeDb: computed(() => gainToDb(gain())),
     statusLabelKey: computed(() => {
       if (status() === 'active') {
         return 'PLAY.STATUS_ACTIVE';
@@ -105,7 +130,7 @@ export const PlayStore = signalStore(
         volumeCurve: settings.volumeCurve(),
         quantize: settings.quantize(),
         swapHands: settings.swapHands(),
-        volumeInverted: false
+        volumeInverted: true
       };
 
       const nextParams = mapPoseToThereminParams(frame, mappingConfig, lastParams);
@@ -134,32 +159,38 @@ export const PlayStore = signalStore(
       });
 
       if (tracking.isRunning()) {
-        patchState(store, { permission: 'granted', isTracking: true });
+        patchState(store, { permission: 'granted', isTracking: true, isPreviewOn: true });
       }
     };
 
     return {
-      start(video?: HTMLVideoElement): void {
+      start(video: HTMLVideoElement): void {
         void (async () => {
           await startAudio();
           if (store.status() === 'error') {
             return;
           }
-          if (!video) {
-            handleTrackingError(new Error('Missing video element'));
-            return;
-          }
 
-          await startTracking(video);
+          if (!tracking.isRunning()) {
+            await startTracking(video);
+          }
         })();
+      },
+      startPreview(video: HTMLVideoElement): void {
+        void startTracking(video);
       },
       stop(): void {
         audio.stop();
-        tracking.stop();
         patchState(store, {
           status: 'idle',
-          isRecording: false,
+          isRecording: false
+        });
+      },
+      stopTracking(): void {
+        tracking.stop();
+        patchState(store, {
           isTracking: false,
+          isPreviewOn: false,
           lastFrame: null
         });
       },

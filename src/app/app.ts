@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
@@ -29,6 +29,7 @@ export class App {
     this.translate.onLangChange.pipe(map((event) => event.lang)),
     { initialValue: this.translate.currentLang || 'es' }
   );
+  readonly isNavOpen = signal(false);
 
   readonly isPlayActive = computed(() => {
     const path = this.currentUrl();
@@ -41,5 +42,13 @@ export class App {
 
   setLanguage(lang: 'es' | 'en'): void {
     this.translate.use(lang);
+  }
+
+  toggleNav(): void {
+    this.isNavOpen.update((open) => !open);
+  }
+
+  closeNav(): void {
+    this.isNavOpen.set(false);
   }
 }

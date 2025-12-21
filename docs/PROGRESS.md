@@ -29,6 +29,8 @@ Fecha de inicio: 2025-12-21
 - [x] Mapeo pose → `pitchHz`/`gain` (log pitch + curva volumen)
 - [ ] Calibración de rango útil (x/y)
 - [x] Overlay opcional (canvas) y manejo de pérdida de tracking
+- [x] Preview siempre encendida + overlay tipo theremin
+- [x] Sliders sincronizados con el tracking
 
 ### Fase 3 — Grabación
 - [ ] Provider `provideRecorder({ ... })`

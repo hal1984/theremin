@@ -34,6 +34,7 @@ Checklist vivo en `docs/PROGRESS.md`.
 ## Requisitos funcionales
 ### Tracking (2 manos)
 - Captura de cámara (ideal: 720p@30fps; degradación adaptativa).
+- Preview siempre encendida en `/play` (solo se enciende el audio con el botón).
 - Detección de **hasta 2 manos**, con landmarks y handedness (izq/der).
 - Asignación configurable:
   - “Pitch hand” y “Volume hand” por handedness o por posición (izquierda/derecha en pantalla).
@@ -44,9 +45,12 @@ Checklist vivo en `docs/PROGRESS.md`.
 
 ### Mapeo Theremin
 - `pitch` continuo:
-  - Por defecto: `x` (horizontal) del fingertip (índice) de la mano de pitch.
+  - Por defecto: `y` (altura, **más abajo = más agudo**) + `z` (profundidad) del fingertip (índice) de la mano de pitch, con peso 50/50.
+  - Profundidad más sensible: rangos estrechos para que pequeños cambios de distancia afecten el pitch.
+  - Evitar extremos graves: aplicar un “floor” (ej. +15%) para que la parte superior no quede demasiado baja.
   - Rango configurable: `minHz`–`maxHz`.
   - Opción “Quantize”: cuantizar a escala (mayor, menor, pentatónica…) y/o a notas discretas.
+  - Ajuste de rango útil: aplicar padding (ej. 0.25–0.75) para aprovechar mejor el ancho completo.
 - `volume` continuo:
   - Por defecto: `y` (vertical) del fingertip (índice) de la mano de volumen (inversión configurable).
   - Rango: `0..1` con curva (lineal / exponencial).
@@ -127,6 +131,8 @@ Usar **Tailwind CSS** (ya integrado en el proyecto) para:
 - Sistema de diseño consistente (spacing, tipografía, colores, estados).
 - Responsividad rápida (mobile-first).
 - Estados accesibles (focus-visible, reduced motion).
+- Overlay visual en cámara con guías tipo “theremin” + líneas de detección.
+- Sliders sincronizados con tracking (el movimiento de manos actualiza los sliders).
 
 ### i18n (ngx-translate)
 Usar **ngx-translate** con providers (standalone) y archivos JSON en `public/assets/i18n/`.

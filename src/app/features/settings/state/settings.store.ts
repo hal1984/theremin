@@ -13,8 +13,8 @@ type SettingsState = {
 };
 
 const initialState: SettingsState = {
-  minHz: 120,
-  maxHz: 1200,
+  minHz: 40,
+  maxHz: 600,
   smoothingMs: 40,
   swapHands: false,
   quantize: false,

@@ -13,6 +13,8 @@ const INDEX_FINGER_TIP = 8;
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 const clamp01 = (value: number) => clamp(value, 0, 1);
+const remap = (value: number, min: number, max: number) =>
+  clamp01((value - min) / Math.max(max - min, 0.0001));
 
 const logMap = (x: number, minHz: number, maxHz: number) => {
   const ratio = maxHz / minHz;
@@ -25,7 +27,7 @@ const applyQuantize = (hz: number): number => {
   return 440 * Math.pow(2, (rounded - 69) / 12);
 };
 
-const getIndexTip = (hand?: HandPose): { x: number; y: number } | null => {
+const getIndexTip = (hand?: HandPose): { x: number; y: number; z?: number } | null => {
   if (!hand) {
     return null;
   }
@@ -35,7 +37,7 @@ const getIndexTip = (hand?: HandPose): { x: number; y: number } | null => {
     return null;
   }
 
-  return { x: landmark.x, y: landmark.y };
+  return { x: landmark.x, y: landmark.y, z: landmark.z };
 };
 
 const pickHand = (
@@ -53,11 +55,25 @@ export const mapPoseToThereminParams = (
   const pitchHand = config.swapHands ? leftHand : rightHand;
   const volumeHand = config.swapHands ? rightHand : leftHand;
 
-  const pitchTip = getIndexTip(pitchHand);
-  const volumeTip = getIndexTip(volumeHand);
+  const fallbackHand = pitchHand ?? volumeHand ?? rightHand ?? leftHand;
+  const pitchTip = getIndexTip(pitchHand ?? fallbackHand);
+  const volumeTip = getIndexTip(volumeHand ?? fallbackHand);
 
-  const nextPitch = pitchTip
-    ? logMap(pitchTip.x, config.minHz, config.maxHz)
+  const pitchYRaw = pitchTip ? remap(pitchTip.y, 0.2, 0.8) : null;
+  const pitchYShaped = pitchYRaw !== null ? Math.pow(pitchYRaw, 0.6) : null;
+  const pitchY = pitchYShaped !== null ? clamp01(pitchYShaped) : null;
+  const depthValue = pitchTip?.z ?? null;
+  const depthMagnitude = depthValue !== null ? Math.abs(depthValue) : null;
+  const pitchZ =
+    depthMagnitude !== null
+      ? remap(clamp(depthMagnitude, 0, 0.3), 0.015, 0.16)
+      : null;
+  const pitchNorm =
+    pitchY !== null && pitchZ !== null
+      ? clamp01(pitchY * 0.5 + pitchZ * 0.5)
+      : pitchY ?? pitchZ;
+  const nextPitch = pitchNorm !== null
+    ? logMap(pitchNorm, config.minHz, config.maxHz)
     : previous.pitchHz;
   const rawGain = volumeTip ? (config.volumeInverted ? volumeTip.y : 1 - volumeTip.y) : 0;
   const curve = config.volumeCurve === 'expo' ? 2 : 1;
