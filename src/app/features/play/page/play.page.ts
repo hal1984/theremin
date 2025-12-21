@@ -154,6 +154,8 @@ export class PlayPage implements OnDestroy {
       // Ignore draw errors if the video frame is not ready yet.
     }
 
+    this.drawThereminOverlay(ctx, width, height);
+
     frame.hands.forEach((hand) => {
       ctx.fillStyle = hand.handedness === 'Left' ? '#22c55e' : '#38bdf8';
       ctx.strokeStyle = ctx.fillStyle;
@@ -225,6 +227,63 @@ export class PlayPage implements OnDestroy {
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  private drawThereminOverlay(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number
+  ): void {
+    const paddingX = width * 0.12;
+    const paddingY = height * 0.12;
+    const baseWidth = width - paddingX * 2;
+    const baseHeight = Math.min(height * 0.18, 140);
+    const baseX = paddingX;
+    const baseY = height - paddingY - baseHeight;
+
+    ctx.save();
+    ctx.globalAlpha = 0.8;
+    ctx.strokeStyle = '#6b4f2a';
+    ctx.fillStyle = 'rgba(139, 94, 60, 1)';
+    ctx.lineWidth = 3;
+
+    // Base
+    ctx.beginPath();
+    ctx.roundRect(baseX, baseY, baseWidth, baseHeight, 18);
+    ctx.fill();
+    ctx.stroke();
+
+    // Control panel lines
+    ctx.beginPath();
+    ctx.moveTo(baseX + baseWidth * 0.2, baseY + baseHeight * 0.35);
+    ctx.lineTo(baseX + baseWidth * 0.8, baseY + baseHeight * 0.35);
+    ctx.moveTo(baseX + baseWidth * 0.2, baseY + baseHeight * 0.6);
+    ctx.lineTo(baseX + baseWidth * 0.7, baseY + baseHeight * 0.6);
+    ctx.stroke();
+
+    // Volume loop antenna (right)
+    const loopCenterX = baseX + baseWidth * 0.82;
+    const loopCenterY = baseY - baseHeight * 0.2;
+    ctx.beginPath();
+    ctx.ellipse(loopCenterX, loopCenterY, 22, 12, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(loopCenterX, baseY);
+    ctx.lineTo(loopCenterX, loopCenterY + 12);
+    ctx.stroke();
+
+    // Pitch rod antenna (left)
+    const rodX = baseX + baseWidth * 0.18;
+    const rodTopY = paddingY * 0.4;
+    ctx.beginPath();
+    ctx.moveTo(rodX, baseY);
+    ctx.lineTo(rodX, rodTopY);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(rodX, rodTopY, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
   }
 
   private attachAspectListener(video: HTMLVideoElement): void {
