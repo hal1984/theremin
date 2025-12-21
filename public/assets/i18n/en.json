@@ -44,7 +44,10 @@
     "GAIN_LABEL": "Volume",
     "PITCH_ARIA": "Pitch in Hertz",
     "GAIN_ARIA": "Volume",
-    "ERROR_START_AUDIO": "Unable to start audio."
+    "ERROR_START_AUDIO": "Unable to start audio.",
+    "ERROR_CAMERA_PERMISSION": "Camera permission denied.",
+    "ERROR_HAND_TRACKING": "Unable to start hand tracking.",
+    "ERROR_CAMERA_UNAVAILABLE": "Camera not available."
   },
   "RECORDINGS": {
     "TAG": "Recordings",

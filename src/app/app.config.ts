@@ -5,6 +5,7 @@ import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideAudioSynth } from './core/di/audio-synth.provider';
 import { provideI18n } from './core/di/i18n.provider';
+import { provideHandLandmarker } from './core/di/hand-tracking.provider';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,6 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
     provideI18n(),
-    provideAudioSynth()
+    provideAudioSynth(),
+    provideHandLandmarker()
   ]
 };

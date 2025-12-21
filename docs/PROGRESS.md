@@ -4,8 +4,8 @@ Fecha de inicio: 2025-12-21
 
 ## Estado actual
 - ✅ Fase 0 completa (base del proyecto)
-- ✅ Fase 1 en cola (audio + sliders accesibles)
-- ⏳ Fase 2 en cola (hand tracking)
+- ✅ Fase 1 completa (audio + sliders accesibles)
+- 🔧 Fase 2 en curso (hand tracking)
 - ⏳ Fase 3 en cola (grabación real)
 - ⏳ Fase 4 en cola (pulido + deploy)
 
@@ -24,10 +24,11 @@ Fecha de inicio: 2025-12-21
 - [x] Validación mobile (iOS/Android) con gesto para `AudioContext`
 
 ### Fase 2 — Hand tracking (2 manos)
-- [ ] Provider `provideHandLandmarker({ ... })` (configurable)
-- [ ] Adapter MediaPipe (WASM) + pipeline de frames con backpressure
-- [ ] Mapeo pose → `pitchHz`/`gain` (log pitch + curva volumen) + calibración
-- [ ] Overlay opcional (canvas) y manejo de pérdida de tracking
+- [x] Provider `provideHandLandmarker({ ... })` (configurable)
+- [x] Adapter MediaPipe (WASM) + pipeline de frames con backpressure
+- [x] Mapeo pose → `pitchHz`/`gain` (log pitch + curva volumen)
+- [ ] Calibración de rango útil (x/y)
+- [x] Overlay opcional (canvas) y manejo de pérdida de tracking
 
 ### Fase 3 — Grabación
 - [ ] Provider `provideRecorder({ ... })`

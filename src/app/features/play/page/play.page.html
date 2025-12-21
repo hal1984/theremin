@@ -34,9 +34,23 @@
         {{ 'PLAY.CAMERA_LABEL' | translate }}
       </p>
       <div
-        class="mt-3 flex min-h-[160px] items-center justify-center rounded-xl border border-slate-200 bg-white text-sm text-slate-400"
+        class="relative mt-3 min-h-[200px] overflow-hidden rounded-xl border border-slate-200 bg-white"
       >
-        {{ 'PLAY.CAMERA_PENDING' | translate }}
+        <video
+          #camera
+          class="absolute inset-0 h-full w-full object-cover"
+          muted
+          playsinline
+          [attr.aria-label]="'PLAY.CAMERA_LABEL' | translate"
+        ></video>
+        <canvas #overlay class="pointer-events-none absolute inset-0 h-full w-full"></canvas>
+        @if (!store.isTracking()) {
+          <div
+            class="absolute inset-0 flex items-center justify-center text-sm text-slate-400"
+          >
+            {{ 'PLAY.CAMERA_PENDING' | translate }}
+          </div>
+        }
       </div>
     </div>
   </div>
