@@ -24,8 +24,9 @@ const initialState: SettingsState = {
 export const SettingsStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withComputed(({ minHz, maxHz }) => ({
-    rangeLabel: computed(() => `${minHz()}–${maxHz()} Hz`)
+  withComputed(({ swapHands, quantize }) => ({
+    swapHandsLabelKey: computed(() => (swapHands() ? 'COMMON.YES' : 'COMMON.NO')),
+    quantizeLabelKey: computed(() => (quantize() ? 'COMMON.YES' : 'COMMON.NO'))
   })),
   withMethods((store) => ({
     setRange(minHz: number, maxHz: number): void {

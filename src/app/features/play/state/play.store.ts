@@ -1,5 +1,7 @@
-import { computed } from '@angular/core';
+import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+
+import { AUDIO_SYNTH } from '../../../application/ports/audio-synth.port';
 
 type PlayStatus = 'idle' | 'active' | 'error';
 type CameraPermission = 'unknown' | 'granted' | 'denied';
@@ -10,7 +12,7 @@ type PlayState = {
   isRecording: boolean;
   pitchHz: number;
   gain: number;
-  errorMessage: string | null;
+  errorMessageKey: string | null;
 };
 
 const initialState: PlayState = {
@@ -18,67 +20,86 @@ const initialState: PlayState = {
   permission: 'unknown',
   isRecording: false,
   pitchHz: 440,
-  gain: 0,
-  errorMessage: null
+  gain: 0.2,
+  errorMessageKey: null
 };
 
 export const PlayStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withComputed(({ status, permission, errorMessage, isRecording }) => ({
+  withComputed(({ status, permission, errorMessageKey, isRecording }) => ({
     isActive: computed(() => status() === 'active'),
     canStart: computed(() => status() !== 'active' && permission() !== 'denied'),
-    hasError: computed(() => errorMessage() !== null),
-    statusLabel: computed(() => {
+    hasError: computed(() => errorMessageKey() !== null),
+    statusLabelKey: computed(() => {
       if (status() === 'active') {
-        return 'Activo';
+        return 'PLAY.STATUS_ACTIVE';
       }
 
       if (status() === 'error') {
-        return 'Error';
+        return 'PLAY.STATUS_ERROR';
       }
 
-      return 'Listo';
+      return 'PLAY.STATUS_READY';
     }),
-    recordingLabel: computed(() => (isRecording() ? 'Grabando' : 'Grabar'))
+    recordingLabelKey: computed(() =>
+      isRecording() ? 'PLAY.RECORD_ACTIVE' : 'PLAY.RECORD_IDLE'
+    )
   })),
-  withMethods((store) => ({
-    start(): void {
-      patchState(store, {
-        status: 'active',
-        errorMessage: null
-      });
-    },
-    stop(): void {
-      patchState(store, {
-        status: 'idle',
-        isRecording: false,
-        gain: 0
-      });
-    },
-    setPermission(permission: CameraPermission): void {
-      patchState(store, { permission });
-    },
-    toggleRecording(): void {
-      if (store.status() !== 'active') {
-        return;
-      }
+  withMethods((store) => {
+    const audio = inject(AUDIO_SYNTH);
 
-      patchState(store, { isRecording: !store.isRecording() });
-    },
-    setPitch(pitchHz: number): void {
-      patchState(store, { pitchHz });
-    },
-    setGain(gain: number): void {
-      patchState(store, { gain });
-    },
-    setError(errorMessage: string | null): void {
-      patchState(store, {
-        errorMessage,
-        status: errorMessage ? 'error' : 'idle'
-      });
-    }
-  }))
+    const startAudio = async (): Promise<void> => {
+      try {
+        await audio.start();
+        audio.setPitchHz(store.pitchHz());
+        audio.setGain(store.gain());
+        patchState(store, { status: 'active', errorMessageKey: null });
+      } catch (error) {
+        patchState(store, {
+          status: 'error',
+          errorMessageKey: 'PLAY.ERROR_START_AUDIO'
+        });
+      }
+    };
+
+    return {
+      start(): void {
+        void startAudio();
+      },
+      stop(): void {
+        audio.stop();
+        patchState(store, {
+          status: 'idle',
+          isRecording: false
+        });
+      },
+      setPermission(permission: CameraPermission): void {
+        patchState(store, { permission });
+      },
+      toggleRecording(): void {
+        if (store.status() !== 'active') {
+          return;
+        }
+
+        patchState(store, { isRecording: !store.isRecording() });
+      },
+      setPitch(pitchHz: number): void {
+        audio.setPitchHz(pitchHz);
+        patchState(store, { pitchHz });
+      },
+      setGain(gain: number): void {
+        audio.setGain(gain);
+        patchState(store, { gain });
+      },
+      setError(errorKey: string | null): void {
+        patchState(store, {
+          errorMessageKey: errorKey,
+          status: errorKey ? 'error' : 'idle'
+        });
+      }
+    };
+  })
 );
 
 export type PlayStore = InstanceType<typeof PlayStore>;

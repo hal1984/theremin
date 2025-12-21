@@ -2,46 +2,74 @@
   class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900 focus:shadow"
   href="#main"
 >
-  Saltar al contenido
+  {{ 'COMMON.SKIP_TO_CONTENT' | translate }}
 </a>
 
 <div class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
   <header class="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Theremin Lab</p>
-      <h1 class="text-xl font-semibold text-slate-900">Control por manos + audio en tiempo real</h1>
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+        {{ 'APP.TITLE' | translate }}
+      </p>
+      <h1 class="text-xl font-semibold text-slate-900">
+        {{ 'APP.SUBTITLE' | translate }}
+      </h1>
     </div>
-    <nav class="flex flex-wrap items-center gap-2" aria-label="Principal">
+    <nav class="flex flex-wrap items-center gap-2" [attr.aria-label]="'COMMON.NAV' | translate">
       <a
         class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
         routerLink="/"
         [class.border-slate-900]="isPlayActive()"
         [class.text-slate-900]="isPlayActive()"
       >
-        Tocar
+        {{ 'NAV.PLAY' | translate }}
       </a>
       <a
         class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
         routerLink="/recordings"
         routerLinkActive="border-slate-900 text-slate-900"
       >
-        Grabaciones
+        {{ 'NAV.RECORDINGS' | translate }}
       </a>
       <a
         class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
         routerLink="/settings"
         routerLinkActive="border-slate-900 text-slate-900"
       >
-        Ajustes
+        {{ 'NAV.SETTINGS' | translate }}
       </a>
       <a
         class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
         routerLink="/about"
         routerLinkActive="border-slate-900 text-slate-900"
       >
-        Sobre
+        {{ 'NAV.ABOUT' | translate }}
       </a>
     </nav>
+    <div class="flex items-center gap-2" role="group" [attr.aria-label]="'COMMON.LANGUAGE' | translate">
+      <button
+        type="button"
+        class="rounded-full border px-3 py-1 text-xs font-semibold transition"
+        [class.border-slate-900]="currentLang() === 'es'"
+        [class.text-slate-900]="currentLang() === 'es'"
+        [class.border-slate-200]="currentLang() !== 'es'"
+        [class.text-slate-600]="currentLang() !== 'es'"
+        (click)="setLanguage('es')"
+      >
+        {{ 'COMMON.LANG_ES' | translate }}
+      </button>
+      <button
+        type="button"
+        class="rounded-full border px-3 py-1 text-xs font-semibold transition"
+        [class.border-slate-900]="currentLang() === 'en'"
+        [class.text-slate-900]="currentLang() === 'en'"
+        [class.border-slate-200]="currentLang() !== 'en'"
+        [class.text-slate-600]="currentLang() !== 'en'"
+        (click)="setLanguage('en')"
+      >
+        {{ 'COMMON.LANG_EN' | translate }}
+      </button>
+    </div>
   </header>
 
   <main id="main" class="flex-1 py-8">
@@ -49,6 +77,6 @@
   </main>
 
   <footer class="text-sm text-slate-500">
-    <p>Hecho para iterar: fase 0 lista, siguiente paso audio y tracking.</p>
+    <p>{{ 'APP.FOOTER' | translate }}</p>
   </footer>
 </div>

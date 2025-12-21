@@ -1,0 +1,79 @@
+{
+  "COMMON": {
+    "SKIP_TO_CONTENT": "Saltar al contenido",
+    "NAV": "Principal",
+    "LANGUAGE": "Idioma",
+    "LANG_ES": "Español",
+    "LANG_EN": "Inglés",
+    "YES": "Sí",
+    "NO": "No",
+    "SECONDS_ABBR": "s",
+    "HZ": "Hz",
+    "MS": "ms"
+  },
+  "APP": {
+    "TITLE": "Theremin Lab",
+    "SUBTITLE": "Control por manos + audio en tiempo real",
+    "FOOTER": "Hecho para iterar: fase 0 lista, siguiente paso audio y tracking."
+  },
+  "NAV": {
+    "PLAY": "Tocar",
+    "RECORDINGS": "Grabaciones",
+    "SETTINGS": "Ajustes",
+    "ABOUT": "Sobre"
+  },
+  "PLAY": {
+    "TAG": "Modo tocar",
+    "TITLE": "Theremin en vivo",
+    "DESCRIPTION": "Activa la cámara para empezar. También puedes usar el modo accesible con sliders.",
+    "STATUS_LABEL": "Estado",
+    "STATUS_READY": "Listo",
+    "STATUS_ACTIVE": "Activo",
+    "STATUS_ERROR": "Error",
+    "STATUS_VALUES": "Pitch: {{pitch}} Hz · Volumen: {{gain}}",
+    "CAMERA_LABEL": "Cámara",
+    "CAMERA_PENDING": "Vista previa pendiente de integrar",
+    "ACTION_START": "Activar",
+    "ACTION_STOP": "Detener",
+    "RECORD_IDLE": "Grabar",
+    "RECORD_ACTIVE": "Grabando",
+    "ACCESSIBLE_LABEL": "Modo accesible",
+    "ACCESSIBLE_DESCRIPTION": "Usa sliders para tocar sin cámara. Se sincronizan con el motor de audio.",
+    "ACCESSIBLE_FORM": "Controles accesibles",
+    "PITCH_LABEL": "Pitch (Hz)",
+    "GAIN_LABEL": "Volumen",
+    "PITCH_ARIA": "Pitch en Hertz",
+    "GAIN_ARIA": "Volumen",
+    "ERROR_START_AUDIO": "No se pudo iniciar el audio."
+  },
+  "RECORDINGS": {
+    "TAG": "Grabaciones",
+    "TITLE": "Tus sesiones",
+    "DESCRIPTION": "Aquí aparecerán las grabaciones cuando activemos el recorder.",
+    "EMPTY": "No hay grabaciones todavía.",
+    "VIEW": "Ver",
+    "ITEM_META": "{{seconds}} s · {{date}}"
+  },
+  "SETTINGS": {
+    "TAG": "Ajustes",
+    "TITLE": "Configuración base",
+    "DESCRIPTION": "Estos valores afectan el mapeo de pitch y volumen. En la fase 1 los haremos editables.",
+    "PITCH_RANGE": "Rango de pitch",
+    "PITCH_RANGE_VALUE": "{{min}}–{{max}} Hz",
+    "SMOOTHING": "Suavizado",
+    "PREFERENCES": "Preferencias",
+    "SWAP_HANDS": "Swap manos: {{value}}",
+    "QUANTIZE": "Cuantizar: {{value}}",
+    "RANGE_MINUS": "-{{value}} Hz",
+    "RANGE_PLUS": "+{{value}} Hz",
+    "SMOOTHING_MINUS": "-{{value}} ms",
+    "SMOOTHING_PLUS": "+{{value}} ms"
+  },
+  "ABOUT": {
+    "TAG": "Sobre",
+    "TITLE": "Theremin por webcam",
+    "DESCRIPTION": "Esta app procesa el video de la cámara en tu dispositivo. No sube video ni audio a un servidor por defecto.",
+    "COMPAT_TITLE": "Compatibilidad",
+    "COMPAT_DESC": "Necesitas HTTPS y un navegador moderno con soporte de Web Audio y getUserMedia."
+  }
+}

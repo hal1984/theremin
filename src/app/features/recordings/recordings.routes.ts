@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { RecordingsPage } from './recordings.page';
+import { RecordingsPage } from './page/recordings.page';
 
 export const recordingsRoutes: Routes = [
   {

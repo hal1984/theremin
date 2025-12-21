@@ -128,6 +128,32 @@ Usar **Tailwind CSS** (ya integrado en el proyecto) para:
 - Responsividad rápida (mobile-first).
 - Estados accesibles (focus-visible, reduced motion).
 
+### i18n (ngx-translate)
+Usar **ngx-translate** con providers (standalone) y archivos JSON en `public/assets/i18n/`.
+
+- Idiomas: **es (por defecto)** y **en**.
+- Proveedor recomendado (SSR/SSG safe):
+  - **Browser**: `TranslateLoader` vía `HttpClient` con `catchError(() => of({}))`.
+  - **Server**: `TranslateLoader` que lee desde `public/assets/i18n/*.json` con `fs`.
+  - **Fallback**: si no existe el JSON, retornar `{}` para no bloquear el prerender.
+- Traducir **todo el texto UI** (incluyendo `aria-label`s).
+- Mantener claves estables (`APP.*`, `NAV.*`, `PLAY.*`, etc.).
+
+### Estructura de componentes (separar HTML/CSS/TS)
+Usar archivos separados para plantillas y estilos:
+
+- `component.ts` + `component.html` + `component.css`.
+- Mantener rutas **relativas** en `templateUrl` / `styleUrl` (Angular).
+- Seguir usando Tailwind en las plantillas; CSS dedicado solo para estilos específicos.
+
+### Formularios (Signal Forms)
+Usar **Signal Forms** (`@angular/forms/signals`) en lugar de Reactive Forms.
+
+- Modelo de formulario como `WritableSignal<T>` y `form(model)` para crear el `FieldTree`.
+- Bind de inputs con `[field]` para sincronización bidireccional.
+- Requisito: **Angular v21+**.
+- Nota: Signal Forms se considera **experimental** (evaluar riesgo para producción). 
+
 ### Proveedores de librerías (Angular)
 Para cada librería JS externa que usemos, crear un provider explícito “estilo Angular”:
 
@@ -214,8 +240,10 @@ src/app/
   features/
     play/               # ruta lazy
       play.routes.ts
-      play.page.ts
-      ui/
+      page/
+        play.page.ts
+        play.page.html
+        play.page.css
       state/            # signalStore + selectors
     recordings/
     settings/
@@ -233,8 +261,8 @@ Reglas:
 
 ## Rutas (lazy loading)
 En `app.routes.ts`:
-- `''` → redirect a `/play`
-- `/play` (lazy)
+- `''` → `play` (lazy)
+- `/play` (alias del root, lazy)
 - `/recordings` (lazy)
 - `/settings` (lazy)
 - `/about` (lazy)

@@ -18,10 +18,10 @@ Fecha de inicio: 2025-12-21
 - [x] Smoke test manual en navegador (routing + consola sin errores)
 
 ### Fase 1 — Audio Theremin
-- [ ] `AudioSynthPort` (domain/application) + adapter Web Audio (infrastructure)
-- [ ] Sliders accesibles (pitch/volume) + teclado (modo sin cámara)
-- [ ] Smoothing + rampas de `AudioParam`
-- [ ] Validación mobile (iOS/Android) con gesto para `AudioContext`
+- [x] `AudioSynthPort` (domain/application) + adapter Web Audio (infrastructure)
+- [x] Sliders accesibles (pitch/volume) + teclado (modo sin cámara)
+- [x] Smoothing + rampas de `AudioParam`
+- [x] Validación mobile (iOS/Android) con gesto para `AudioContext`
 
 ### Fase 2 — Hand tracking (2 manos)
 - [ ] Provider `provideHandLandmarker({ ... })` (configurable)
@@ -43,4 +43,3 @@ Fecha de inicio: 2025-12-21
 
 ## Notas
 - Versionado/estado de dependencias: si se cambia el enfoque de state management o hand tracking, actualizar también `docs/THEREMIN_HANDTRACKING_SPEC.md`.
-

@@ -1,0 +1,79 @@
+{
+  "COMMON": {
+    "SKIP_TO_CONTENT": "Skip to content",
+    "NAV": "Primary",
+    "LANGUAGE": "Language",
+    "LANG_ES": "Spanish",
+    "LANG_EN": "English",
+    "YES": "Yes",
+    "NO": "No",
+    "SECONDS_ABBR": "s",
+    "HZ": "Hz",
+    "MS": "ms"
+  },
+  "APP": {
+    "TITLE": "Theremin Lab",
+    "SUBTITLE": "Hand tracking + real-time audio",
+    "FOOTER": "Built to iterate: phase 0 done, next audio and tracking."
+  },
+  "NAV": {
+    "PLAY": "Play",
+    "RECORDINGS": "Recordings",
+    "SETTINGS": "Settings",
+    "ABOUT": "About"
+  },
+  "PLAY": {
+    "TAG": "Play mode",
+    "TITLE": "Live theremin",
+    "DESCRIPTION": "Enable the camera to start. You can also use accessible sliders.",
+    "STATUS_LABEL": "Status",
+    "STATUS_READY": "Ready",
+    "STATUS_ACTIVE": "Active",
+    "STATUS_ERROR": "Error",
+    "STATUS_VALUES": "Pitch: {{pitch}} Hz · Volume: {{gain}}",
+    "CAMERA_LABEL": "Camera",
+    "CAMERA_PENDING": "Preview pending integration",
+    "ACTION_START": "Start",
+    "ACTION_STOP": "Stop",
+    "RECORD_IDLE": "Record",
+    "RECORD_ACTIVE": "Recording",
+    "ACCESSIBLE_LABEL": "Accessible mode",
+    "ACCESSIBLE_DESCRIPTION": "Use sliders to play without camera. Synced with the audio engine.",
+    "ACCESSIBLE_FORM": "Accessible controls",
+    "PITCH_LABEL": "Pitch (Hz)",
+    "GAIN_LABEL": "Volume",
+    "PITCH_ARIA": "Pitch in Hertz",
+    "GAIN_ARIA": "Volume",
+    "ERROR_START_AUDIO": "Unable to start audio."
+  },
+  "RECORDINGS": {
+    "TAG": "Recordings",
+    "TITLE": "Your sessions",
+    "DESCRIPTION": "Recordings will appear here once we enable the recorder.",
+    "EMPTY": "No recordings yet.",
+    "VIEW": "View",
+    "ITEM_META": "{{seconds}} s · {{date}}"
+  },
+  "SETTINGS": {
+    "TAG": "Settings",
+    "TITLE": "Base configuration",
+    "DESCRIPTION": "These values affect pitch/volume mapping. We'll make them editable in phase 1.",
+    "PITCH_RANGE": "Pitch range",
+    "PITCH_RANGE_VALUE": "{{min}}–{{max}} Hz",
+    "SMOOTHING": "Smoothing",
+    "PREFERENCES": "Preferences",
+    "SWAP_HANDS": "Swap hands: {{value}}",
+    "QUANTIZE": "Quantize: {{value}}",
+    "RANGE_MINUS": "-{{value}} Hz",
+    "RANGE_PLUS": "+{{value}} Hz",
+    "SMOOTHING_MINUS": "-{{value}} ms",
+    "SMOOTHING_PLUS": "+{{value}} ms"
+  },
+  "ABOUT": {
+    "TAG": "About",
+    "TITLE": "Webcam theremin",
+    "DESCRIPTION": "This app processes video on your device. It does not upload video or audio by default.",
+    "COMPAT_TITLE": "Compatibility",
+    "COMPAT_DESC": "HTTPS is required, plus a modern browser with Web Audio and getUserMedia."
+  }
+}

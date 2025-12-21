@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -15,6 +16,7 @@ import { filter, map } from 'rxjs';
 })
 export class App {
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -23,8 +25,21 @@ export class App {
     { initialValue: this.router.url }
   );
 
+  readonly currentLang = toSignal(
+    this.translate.onLangChange.pipe(map((event) => event.lang)),
+    { initialValue: this.translate.currentLang || 'es' }
+  );
+
   readonly isPlayActive = computed(() => {
     const path = this.currentUrl();
     return path === '/' || path.startsWith('/play');
   });
+
+  constructor() {
+    this.translate.use('es');
+  }
+
+  setLanguage(lang: 'es' | 'en'): void {
+    this.translate.use(lang);
+  }
 }

@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { SettingsPage } from './settings.page';
+import { SettingsPage } from './page/settings.page';
 
 export const settingsRoutes: Routes = [
   {
