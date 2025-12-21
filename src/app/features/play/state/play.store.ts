@@ -41,6 +41,8 @@ type PlayState = {
   isRecording: boolean;
   isTracking: boolean;
   isPreviewOn: boolean;
+  hasActivatedOnce: boolean;
+  needsAudioUnlock: boolean;
   pitchHz: number;
   gain: number;
   errorMessageKey: string | null;
@@ -53,6 +55,8 @@ const initialState: PlayState = {
   isRecording: false,
   isTracking: false,
   isPreviewOn: false,
+  hasActivatedOnce: false,
+  needsAudioUnlock: false,
   pitchHz: 440,
   gain: 0.2,
   errorMessageKey: null,
@@ -62,10 +66,11 @@ const initialState: PlayState = {
 export const PlayStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withComputed(({ status, permission, errorMessageKey, isRecording, pitchHz, gain }) => ({
+  withComputed(({ status, permission, errorMessageKey, isRecording, pitchHz, gain, hasActivatedOnce, needsAudioUnlock }) => ({
     isActive: computed(() => status() === 'active'),
     canStart: computed(() => status() !== 'active' && permission() !== 'denied'),
     hasError: computed(() => errorMessageKey() !== null),
+    shouldPulseStart: computed(() => !hasActivatedOnce() && status() === 'idle' && !needsAudioUnlock()),
     pitchNoteLabel: computed(() => hzToNote(pitchHz())),
     volumeDb: computed(() => gainToDb(gain())),
     statusLabelKey: computed(() => {
@@ -99,8 +104,19 @@ export const PlayStore = signalStore(
         await audio.start();
         audio.setPitchHz(store.pitchHz());
         audio.setGain(store.gain());
-        patchState(store, { status: 'active', errorMessageKey: null });
+        patchState(store, { status: 'active', errorMessageKey: null, needsAudioUnlock: false });
       } catch (error) {
+        const isGestureError =
+          error instanceof DOMException && error.name === 'NotAllowedError';
+        if (isGestureError) {
+          patchState(store, {
+            status: 'idle',
+            needsAudioUnlock: true,
+            errorMessageKey: 'PLAY.ERROR_AUDIO_GESTURE'
+          });
+          return;
+        }
+
         patchState(store, {
           status: 'error',
           errorMessageKey: 'PLAY.ERROR_START_AUDIO'
@@ -166,6 +182,7 @@ export const PlayStore = signalStore(
     return {
       start(video: HTMLVideoElement): void {
         void (async () => {
+          patchState(store, { hasActivatedOnce: true });
           await startAudio();
           if (store.status() === 'error') {
             return;

@@ -31,6 +31,7 @@
     "STATUS_LABEL": "Estado",
     "STATUS_READY": "Listo",
     "STATUS_ACTIVE": "Activo",
+    "STATUS_TAP_TO_START": "pulsa Activar para empezar",
     "STATUS_ERROR": "Error",
     "STATUS_VALUES": "Nota: {{note}} · Volumen: {{db}} dB",
     "CAMERA_LABEL": "Cámara",
@@ -48,6 +49,7 @@
     "PITCH_ARIA": "Pitch en Hertz",
     "GAIN_ARIA": "Volumen",
     "ERROR_START_AUDIO": "No se pudo iniciar el audio.",
+    "ERROR_AUDIO_GESTURE": "Toca la pantalla para activar el audio.",
     "ERROR_CAMERA_PERMISSION": "Permiso de cámara denegado.",
     "ERROR_HAND_TRACKING": "No se pudo iniciar el tracking de manos.",
     "ERROR_CAMERA_UNAVAILABLE": "No se pudo acceder a la cámara."

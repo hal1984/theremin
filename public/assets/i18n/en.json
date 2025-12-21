@@ -31,6 +31,7 @@
     "STATUS_LABEL": "Status",
     "STATUS_READY": "Ready",
     "STATUS_ACTIVE": "Active",
+    "STATUS_TAP_TO_START": "tap Activate to start",
     "STATUS_ERROR": "Error",
     "STATUS_VALUES": "Note: {{note}} · Volume: {{db}} dB",
     "CAMERA_LABEL": "Camera",
@@ -48,6 +49,7 @@
     "PITCH_ARIA": "Pitch in Hertz",
     "GAIN_ARIA": "Volume",
     "ERROR_START_AUDIO": "Unable to start audio.",
+    "ERROR_AUDIO_GESTURE": "Tap the screen to enable audio.",
     "ERROR_CAMERA_PERMISSION": "Camera permission denied.",
     "ERROR_HAND_TRACKING": "Unable to start hand tracking.",
     "ERROR_CAMERA_UNAVAILABLE": "Camera not available."
