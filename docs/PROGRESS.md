@@ -4,7 +4,7 @@ Fecha de inicio: 2025-12-21
 
 ## Estado actual
 - ✅ Fase 0 completa (base del proyecto)
-- ⏳ Fase 1 en cola (audio + sliders accesibles)
+- ✅ Fase 1 en cola (audio + sliders accesibles)
 - ⏳ Fase 2 en cola (hand tracking)
 - ⏳ Fase 3 en cola (grabación real)
 - ⏳ Fase 4 en cola (pulido + deploy)
