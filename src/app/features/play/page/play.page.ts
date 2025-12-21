@@ -234,55 +234,257 @@ export class PlayPage implements OnDestroy {
     width: number,
     height: number
   ): void {
-    const paddingX = width * 0.12;
-    const paddingY = height * 0.12;
-    const baseWidth = width - paddingX * 2;
-    const baseHeight = Math.min(height * 0.18, 140);
-    const baseX = paddingX;
-    const baseY = height - paddingY - baseHeight;
+    const clamp = (value: number, min: number, max: number) =>
+      Math.min(Math.max(value, min), max);
+
+    const roundRectPath = (x: number, y: number, w: number, h: number, r: number) => {
+      const radius = clamp(r, 0, Math.min(w, h) / 2);
+      const anyCtx = ctx as CanvasRenderingContext2D & {
+        roundRect?: (x: number, y: number, w: number, h: number, radii: number | number[]) => void;
+      };
+      ctx.beginPath();
+      if (anyCtx.roundRect) {
+        anyCtx.roundRect(x, y, w, h, radius);
+        return;
+      }
+
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + w, y, x + w, y + h, radius);
+      ctx.arcTo(x + w, y + h, x, y + h, radius);
+      ctx.arcTo(x, y + h, x, y, radius);
+      ctx.arcTo(x, y, x + w, y, radius);
+      ctx.closePath();
+    };
+
+    const drawKnob = (
+      x: number,
+      y: number,
+      radius: number,
+      angleRadians: number
+    ): void => {
+      const body = ctx.createRadialGradient(
+        x - radius * 0.35,
+        y - radius * 0.35,
+        radius * 0.2,
+        x,
+        y,
+        radius
+      );
+      body.addColorStop(0, 'rgba(248,250,252,0.92)');
+      body.addColorStop(0.55, 'rgba(148,163,184,0.92)');
+      body.addColorStop(1, 'rgba(51,65,85,0.92)');
+
+      ctx.save();
+      ctx.fillStyle = body;
+      ctx.strokeStyle = 'rgba(15,23,42,0.55)';
+      ctx.lineWidth = Math.max(1, radius * 0.18);
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Pointer
+      const pointerLen = radius * 0.9;
+      ctx.strokeStyle = 'rgba(15,23,42,0.7)';
+      ctx.lineWidth = Math.max(1, radius * 0.14);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + Math.cos(angleRadians) * pointerLen, y + Math.sin(angleRadians) * pointerLen);
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    const paddingY = Math.min(height * 0.1, 64);
+    const cabinetW = clamp(width * 0.78, 260, width * 0.92);
+    const cabinetH = clamp(height * 0.24, 120, 190);
+    const cabinetX = (width - cabinetW) / 2;
+    const cabinetY = height - paddingY - cabinetH;
+    const cabinetRadius = clamp(cabinetH * 0.18, 14, 24);
+
+    const pitchRodX = cabinetX + cabinetW * 0.18;
+    const volumeLoopX = cabinetX + cabinetW * 0.82;
 
     ctx.save();
-    ctx.globalAlpha = 0.8;
-    ctx.strokeStyle = '#6b4f2a';
-    ctx.fillStyle = 'rgba(139, 94, 60, 1)';
-    ctx.lineWidth = 3;
+    ctx.globalAlpha = 0.82;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
 
-    // Base
+    // Shadow
+    ctx.save();
+    ctx.globalAlpha *= 0.35;
+    ctx.fillStyle = 'rgba(15,23,42,0.35)';
     ctx.beginPath();
-    ctx.roundRect(baseX, baseY, baseWidth, baseHeight, 18);
+    ctx.ellipse(
+      width / 2,
+      cabinetY + cabinetH + cabinetH * 0.18,
+      cabinetW * 0.42,
+      cabinetH * 0.18,
+      0,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+    ctx.restore();
+
+    // Cabinet wood
+    const wood = ctx.createLinearGradient(cabinetX, cabinetY, cabinetX + cabinetW, cabinetY);
+    wood.addColorStop(0, '#5b3417');
+    wood.addColorStop(0.18, '#b07543');
+    wood.addColorStop(0.5, '#7a4520');
+    wood.addColorStop(0.82, '#c0824c');
+    wood.addColorStop(1, '#5b3417');
+
+    ctx.fillStyle = wood;
+    ctx.strokeStyle = 'rgba(43,24,11,0.9)';
+    ctx.lineWidth = clamp(cabinetH * 0.035, 3, 6);
+    roundRectPath(cabinetX, cabinetY, cabinetW, cabinetH, cabinetRadius);
     ctx.fill();
     ctx.stroke();
 
-    // Control panel lines
-    ctx.beginPath();
-    ctx.moveTo(baseX + baseWidth * 0.2, baseY + baseHeight * 0.35);
-    ctx.lineTo(baseX + baseWidth * 0.8, baseY + baseHeight * 0.35);
-    ctx.moveTo(baseX + baseWidth * 0.2, baseY + baseHeight * 0.6);
-    ctx.lineTo(baseX + baseWidth * 0.7, baseY + baseHeight * 0.6);
+    // Subtle inner edge highlight
+    ctx.save();
+    ctx.globalAlpha *= 0.5;
+    ctx.strokeStyle = 'rgba(248,250,252,0.25)';
+    ctx.lineWidth = 1.5;
+    roundRectPath(cabinetX + 3, cabinetY + 3, cabinetW - 6, cabinetH - 6, cabinetRadius - 3);
     ctx.stroke();
+    ctx.restore();
 
-    // Volume loop antenna (right)
-    const loopCenterX = baseX + baseWidth * 0.82;
-    const loopCenterY = baseY - baseHeight * 0.2;
-    ctx.beginPath();
-    ctx.ellipse(loopCenterX, loopCenterY, 22, 12, 0, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(loopCenterX, baseY);
-    ctx.lineTo(loopCenterX, loopCenterY + 12);
-    ctx.stroke();
-
-    // Pitch rod antenna (left)
-    const rodX = baseX + baseWidth * 0.18;
-    const rodTopY = paddingY * 0.4;
-    ctx.beginPath();
-    ctx.moveTo(rodX, baseY);
-    ctx.lineTo(rodX, rodTopY);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(rodX, rodTopY, 6, 0, Math.PI * 2);
+    // Top highlight/shade
+    const shade = ctx.createLinearGradient(cabinetX, cabinetY, cabinetX, cabinetY + cabinetH);
+    shade.addColorStop(0, 'rgba(255,255,255,0.28)');
+    shade.addColorStop(0.35, 'rgba(255,255,255,0)');
+    shade.addColorStop(1, 'rgba(0,0,0,0.18)');
+    ctx.fillStyle = shade;
+    roundRectPath(cabinetX, cabinetY, cabinetW, cabinetH, cabinetRadius);
     ctx.fill();
 
+    // Control panel plate
+    const panelMargin = cabinetW * 0.08;
+    const panelH = cabinetH * 0.44;
+    const panelX = cabinetX + panelMargin;
+    const panelY = cabinetY + cabinetH * 0.12;
+    const panelW = cabinetW - panelMargin * 2;
+    const panelR = clamp(cabinetRadius * 0.8, 10, 18);
+
+    const metal = ctx.createLinearGradient(panelX, panelY, panelX, panelY + panelH);
+    metal.addColorStop(0, 'rgba(226,232,240,0.92)');
+    metal.addColorStop(0.28, 'rgba(148,163,184,0.92)');
+    metal.addColorStop(0.6, 'rgba(241,245,249,0.86)');
+    metal.addColorStop(1, 'rgba(100,116,139,0.9)');
+
+    ctx.fillStyle = metal;
+    ctx.strokeStyle = 'rgba(30,41,59,0.5)';
+    ctx.lineWidth = 2;
+    roundRectPath(panelX, panelY, panelW, panelH, panelR);
+    ctx.fill();
+    ctx.stroke();
+
+    // Knobs row
+    const knobY = panelY + panelH * 0.62;
+    const knobR = clamp(panelH * 0.22, 10, 18);
+    const knobXs = [
+      panelX + panelW * 0.18,
+      panelX + panelW * 0.38,
+      panelX + panelW * 0.58,
+      panelX + panelW * 0.78,
+    ];
+    knobXs.forEach((x, index) => {
+      drawKnob(x, knobY, knobR, (-Math.PI / 2) + index * 0.35);
+    });
+
+    // Speaker grill
+    const grillX = cabinetX + cabinetW * 0.6;
+    const grillY = cabinetY + cabinetH * 0.64;
+    const grillW = cabinetW * 0.32;
+    const grillH = cabinetH * 0.25;
+    const grillR = clamp(grillH * 0.28, 10, 18);
+    ctx.save();
+    ctx.globalAlpha *= 0.65;
+    ctx.fillStyle = 'rgba(15,23,42,0.33)';
+    roundRectPath(grillX, grillY, grillW, grillH, grillR);
+    ctx.fill();
+
+    ctx.globalAlpha *= 0.8;
+    ctx.fillStyle = 'rgba(15,23,42,0.55)';
+    const dotR = clamp(grillH * 0.06, 1.4, 3);
+    const step = dotR * 3;
+    for (let y = grillY + dotR * 2; y <= grillY + grillH - dotR * 2; y += step) {
+      for (let x = grillX + dotR * 2; x <= grillX + grillW - dotR * 2; x += step) {
+        ctx.beginPath();
+        ctx.arc(x, y, dotR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+
+    // Brand text
+    ctx.save();
+    ctx.globalAlpha *= 0.6;
+    ctx.fillStyle = 'rgba(15,23,42,0.45)';
+    ctx.font = `600 ${clamp(cabinetH * 0.12, 12, 18)}px system-ui, -apple-system, Segoe UI, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('THEREMIN', width / 2, cabinetY + cabinetH * 0.84);
+    ctx.restore();
+
+    // Antennas (metal)
+    const antennaWidth = clamp(cabinetH * 0.03, 3, 5);
+    const metalStroke = (x: number): CanvasGradient => {
+      const g = ctx.createLinearGradient(x - antennaWidth, 0, x + antennaWidth, 0);
+      g.addColorStop(0, 'rgba(226,232,240,0.82)');
+      g.addColorStop(0.5, 'rgba(148,163,184,0.95)');
+      g.addColorStop(1, 'rgba(248,250,252,0.82)');
+      return g;
+    };
+
+    ctx.save();
+    ctx.globalAlpha *= 0.95;
+    ctx.lineWidth = antennaWidth;
+
+    // Pitch rod (left)
+    const rodTopY = Math.max(height * 0.06, 24);
+    ctx.strokeStyle = metalStroke(pitchRodX);
+    ctx.beginPath();
+    ctx.moveTo(pitchRodX, cabinetY);
+    ctx.lineTo(pitchRodX, rodTopY);
+    ctx.stroke();
+
+    const ballR = antennaWidth * 1.6;
+    const ball = ctx.createRadialGradient(
+      pitchRodX - ballR * 0.35,
+      rodTopY - ballR * 0.35,
+      1,
+      pitchRodX,
+      rodTopY,
+      ballR * 1.8
+    );
+    ball.addColorStop(0, 'rgba(248,250,252,0.95)');
+    ball.addColorStop(1, 'rgba(148,163,184,0.95)');
+    ctx.fillStyle = ball;
+    ctx.beginPath();
+    ctx.arc(pitchRodX, rodTopY, ballR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(71,85,105,0.55)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Volume loop (right)
+    const loopY = cabinetY - cabinetH * 0.08;
+    const loopRx = clamp(cabinetW * 0.06, 16, 28);
+    const loopRy = loopRx * 0.55;
+    ctx.strokeStyle = metalStroke(volumeLoopX);
+    ctx.lineWidth = antennaWidth;
+    ctx.beginPath();
+    ctx.moveTo(volumeLoopX, cabinetY);
+    ctx.lineTo(volumeLoopX, loopY + loopRy);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.ellipse(volumeLoopX, loopY, loopRx, loopRy, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.restore();
     ctx.restore();
   }
 
