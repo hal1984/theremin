@@ -14,9 +14,9 @@
     <nav class="flex flex-wrap items-center gap-2" aria-label="Principal">
       <a
         class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
-        routerLink="/play"
-        routerLinkActive="border-slate-900 text-slate-900"
-        [routerLinkActiveOptions]="{ exact: true }"
+        routerLink="/"
+        [class.border-slate-900]="isPlayActive()"
+        [class.text-slate-900]="isPlayActive()"
       >
         Tocar
       </a>

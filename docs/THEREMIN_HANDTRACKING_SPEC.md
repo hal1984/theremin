@@ -405,9 +405,16 @@ Detalles:
 ## Deploy (Netlify) — preparación (lo haremos después)
 Requisitos:
 - Build command: `npm run build`
-- Publish directory: `dist/theremin` (confirmar exacto tras el primer build)
+- Publish directory: `dist/theremin/browser`
 - SPA routing:
   - Añadir regla Netlify `/* /index.html 200` (vía `public/_redirects` o `netlify.toml`)
+
+### SSG / prerender con Angular en Netlify
+Netlify soporta **contenido prerenderizado** por Angular (SSG-like) como hosting estático.
+
+- En builds con prerender, el output suele ser `dist/<app>/browser` (donde está `index.html` y los assets).
+- En ese caso, el `publish` de Netlify debe apuntar a `dist/<app>/browser` (no al parent).
+- Si también se comporta como SPA para rutas client-side, mantener el rewrite `/* /index.html 200`.
 
 Checklist:
 - HTTPS OK (necesario para webcam).

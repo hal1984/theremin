@@ -1,0 +1,33 @@
+[build]
+  command = "npm run build"
+  publish = "dist/theremin/browser"
+
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/play"
+  to = "/play/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/recordings"
+  to = "/recordings/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/settings"
+  to = "/settings/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/about"
+  to = "/about/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
