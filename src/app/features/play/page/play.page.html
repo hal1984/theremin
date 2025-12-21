@@ -64,33 +64,6 @@
     </div>
   </div>
 
-  <div class="flex flex-wrap gap-3">
-    <button
-      type="button"
-      class="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-300"
-      [disabled]="!store.canStart()"
-      (click)="start()"
-    >
-      {{ 'PLAY.ACTION_START' | translate }}
-    </button>
-    <button
-      type="button"
-      class="rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
-      [disabled]="!store.isActive()"
-      (click)="stop()"
-    >
-      {{ 'PLAY.ACTION_STOP' | translate }}
-    </button>
-    <button
-      type="button"
-      class="rounded-full border border-rose-200 bg-rose-50 px-5 py-2 text-sm font-semibold text-rose-700 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
-      [disabled]="!store.isActive()"
-      (click)="toggleRecording()"
-    >
-      {{ store.recordingLabelKey() | translate }}
-    </button>
-  </div>
-
   <div class="rounded-2xl border border-slate-200 bg-white p-4">
     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
       {{ 'PLAY.ACCESSIBLE_LABEL' | translate }}
@@ -129,5 +102,32 @@
         </span>
       </label>
     </form>
+  </div>
+
+  <div class="fixed bottom-6 right-6 z-30 flex flex-col gap-3">
+    <button
+      type="button"
+      class="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-300"
+      [disabled]="!store.canStart()"
+      (click)="start()"
+    >
+      {{ 'PLAY.ACTION_START' | translate }}
+    </button>
+    <button
+      type="button"
+      class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 shadow-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+      [disabled]="!store.isActive()"
+      (click)="stop()"
+    >
+      {{ 'PLAY.ACTION_STOP' | translate }}
+    </button>
+    <button
+      type="button"
+      class="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 shadow-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
+      [disabled]="!store.isActive()"
+      (click)="toggleRecording()"
+    >
+      {{ store.recordingLabelKey() | translate }}
+    </button>
   </div>
 </section>
