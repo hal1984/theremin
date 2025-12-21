@@ -121,9 +121,7 @@ export class MediaPipeHandTracker implements HandTrackingPort {
     video.playsInline = true;
     video.setAttribute('muted', '');
     video.setAttribute('playsinline', '');
-    video.play().catch(() => {
-      // Ignore autoplay errors; user interaction can retrigger playback.
-    });
+    video.play();
   }
 
   private loop = (now: number): void => {
