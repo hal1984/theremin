@@ -1,0 +1,24 @@
+@if (active()) {
+  <div class="joya-splash" aria-hidden="true">
+    <div class="joya-splash__glow"></div>
+    <div class="joya-splash__grid"></div>
+    <div class="joya-splash__beam"></div>
+    <div class="joya-splash__content">
+      <img
+        ngSrc="/assets/joya_theremin.jpg"
+        width="1200"
+        height="800"
+        alt="{{ 'APP.SPLASH_ALT' | translate }}"
+        priority
+        class="joya-splash__image"
+      />
+      <div class="joya-splash__title">{{ 'APP.TITLE' | translate }}</div>
+      <div class="joya-splash__subtitle">{{ 'APP.SUBTITLE' | translate }}</div>
+      <div class="joya-splash__rings">
+        <span class="joya-splash__ring joya-splash__ring--one"></span>
+        <span class="joya-splash__ring joya-splash__ring--two"></span>
+        <span class="joya-splash__ring joya-splash__ring--three"></span>
+      </div>
+    </div>
+  </div>
+}

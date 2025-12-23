@@ -16,6 +16,7 @@
   "APP": {
     "TITLE": "Joya's Theremin",
     "SUBTITLE": "Control por manos + audio en tiempo real",
+    "SPLASH_ALT": "Retrato de Joya con su theremin",
     "FOOTER": "Hecho para iterar: fase 0 lista, siguiente paso audio y tracking."
   },
   "NAV": {

@@ -16,6 +16,7 @@
   "APP": {
     "TITLE": "Joya's Theremin",
     "SUBTITLE": "Hand tracking + real-time audio",
+    "SPLASH_ALT": "Portrait of Joya with her theremin",
     "FOOTER": "Built to iterate: phase 0 done, next audio and tracking."
   },
   "NAV": {

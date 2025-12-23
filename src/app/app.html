@@ -5,7 +5,12 @@
   {{ 'COMMON.SKIP_TO_CONTENT' | translate }}
 </a>
 
-<div class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-6 pt-1 sm:px-6 lg:px-8">
+<app-joya-splash [active]="showSplash()" />
+
+<div
+  class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-6 pt-1 sm:px-6 lg:px-8"
+  [attr.inert]="showSplash() ? '' : null"
+>
   @if (isNavOpen()) {
     <button
       type="button"
