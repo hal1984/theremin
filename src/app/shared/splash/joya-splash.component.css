@@ -9,7 +9,7 @@
     radial-gradient(circle at 80% 15%, rgba(56, 189, 248, 0.35), transparent 45%),
     radial-gradient(circle at 50% 85%, rgba(250, 204, 21, 0.3), transparent 60%),
     linear-gradient(130deg, #0f172a 0%, #111827 40%, #020617 100%);
-  animation: joya-splash-fade 2.6s ease-in-out forwards;
+  animation: joya-splash-fade 4.2s ease-in-out forwards;
 }
 
 .joya-splash__glow,

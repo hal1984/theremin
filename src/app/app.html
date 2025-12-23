@@ -1,16 +1,14 @@
-<a
-  class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900 focus:shadow"
-  href="#main"
->
-  {{ 'COMMON.SKIP_TO_CONTENT' | translate }}
-</a>
-
 <app-joya-splash [active]="showSplash()" />
 
-<div
-  class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-6 pt-1 sm:px-6 lg:px-8"
-  [attr.inert]="showSplash() ? '' : null"
->
+@if (!showSplash()) {
+  <a
+    class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900 focus:shadow"
+    href="#main"
+  >
+    {{ 'COMMON.SKIP_TO_CONTENT' | translate }}
+  </a>
+
+  <div class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-6 pt-1 sm:px-6 lg:px-8">
   @if (isNavOpen()) {
     <button
       type="button"
@@ -126,15 +124,16 @@
     </main>
   </div>
 
-  @if (!isNavOpen()) {
-    <button
-      type="button"
-      class="fixed bottom-6 left-6 z-20 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-lg transition hover:border-slate-300 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 lg:hidden"
-      [attr.aria-expanded]="isNavOpen()"
-      aria-controls="side-nav"
-      (click)="toggleNav()"
-    >
-      {{ 'COMMON.MENU_OPEN' | translate }}
-    </button>
-  }
-</div>
+    @if (!isNavOpen()) {
+      <button
+        type="button"
+        class="fixed bottom-6 left-6 z-20 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-lg transition hover:border-slate-300 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 lg:hidden"
+        [attr.aria-expanded]="isNavOpen()"
+        aria-controls="side-nav"
+        (click)="toggleNav()"
+      >
+        {{ 'COMMON.MENU_OPEN' | translate }}
+      </button>
+    }
+  </div>
+}

@@ -45,7 +45,7 @@ export class App {
     this.translate.use('es');
     if (isPlatformBrowser(this.platformId)) {
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const durationMs = prefersReducedMotion ? 700 : 2600;
+      const durationMs = prefersReducedMotion ? 1200 : 4200;
       window.setTimeout(() => this.showSplash.set(false), durationMs);
     }
   }
