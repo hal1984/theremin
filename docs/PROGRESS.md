@@ -5,7 +5,7 @@ Fecha de inicio: 2025-12-21
 ## Estado actual
 - ✅ Fase 0 completa (base del proyecto)
 - ✅ Fase 1 completa (audio + sliders accesibles)
-- 🔧 Fase 2 en curso (hand tracking)
+- ✅ Fase 2 completa (hand tracking)
 - ⏳ Fase 3 en cola (grabación real)
 - ⏳ Fase 4 en cola (pulido + deploy)
 
@@ -27,7 +27,7 @@ Fecha de inicio: 2025-12-21
 - [x] Provider `provideHandLandmarker({ ... })` (configurable)
 - [x] Adapter MediaPipe (WASM) + pipeline de frames con backpressure
 - [x] Mapeo pose → `pitchHz`/`gain` (log pitch + curva volumen)
-- [ ] Calibración de rango útil (x/y)
+- [x] Calibración de rango útil (x/y)
 - [x] Overlay opcional (canvas) y manejo de pérdida de tracking
 - [x] Preview siempre encendida + overlay tipo theremin
 - [x] Sliders sincronizados con el tracking
