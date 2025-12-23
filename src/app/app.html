@@ -40,7 +40,7 @@
       </div>
       <button
         type="button"
-        class="mb-4 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 lg:hidden"
+        class="mb-4 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 lg:hidden"
         [attr.aria-expanded]="isNavOpen()"
         aria-controls="side-nav"
         (click)="toggleNav()"
@@ -50,35 +50,42 @@
 
       <nav class="mt-6 flex flex-col gap-2">
         <a
-          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
           routerLink="/"
           (click)="closeNav()"
           [class.border-slate-900]="isPlayActive()"
           [class.text-slate-900]="isPlayActive()"
+          [attr.aria-current]="isPlayActive() ? 'page' : null"
         >
           {{ 'NAV.PLAY' | translate }}
         </a>
         <a
-          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
           routerLink="/recordings"
           (click)="closeNav()"
           routerLinkActive="border-slate-900 text-slate-900"
+          #recordingsLink="routerLinkActive"
+          [attr.aria-current]="recordingsLink.isActive ? 'page' : null"
         >
           {{ 'NAV.RECORDINGS' | translate }}
         </a>
         <a
-          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
           routerLink="/settings"
           (click)="closeNav()"
           routerLinkActive="border-slate-900 text-slate-900"
+          #settingsLink="routerLinkActive"
+          [attr.aria-current]="settingsLink.isActive ? 'page' : null"
         >
           {{ 'NAV.SETTINGS' | translate }}
         </a>
         <a
-          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900"
+          class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
           routerLink="/about"
           (click)="closeNav()"
           routerLinkActive="border-slate-900 text-slate-900"
+          #aboutLink="routerLinkActive"
+          [attr.aria-current]="aboutLink.isActive ? 'page' : null"
         >
           {{ 'NAV.ABOUT' | translate }}
         </a>
@@ -87,7 +94,7 @@
       <div class="mt-6 flex items-center gap-2" role="group" [attr.aria-label]="'COMMON.LANGUAGE' | translate">
         <button
           type="button"
-          class="rounded-full border px-3 py-1 text-xs font-semibold transition"
+          class="rounded-full border px-3 py-1 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
           [class.border-slate-900]="currentLang() === 'es'"
           [class.text-slate-900]="currentLang() === 'es'"
           [class.border-slate-200]="currentLang() !== 'es'"
@@ -98,7 +105,7 @@
         </button>
         <button
           type="button"
-          class="rounded-full border px-3 py-1 text-xs font-semibold transition"
+          class="rounded-full border px-3 py-1 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
           [class.border-slate-900]="currentLang() === 'en'"
           [class.text-slate-900]="currentLang() === 'en'"
           [class.border-slate-200]="currentLang() !== 'en'"
@@ -114,7 +121,7 @@
       </footer>
     </aside>
 
-    <main id="main" class="min-w-0 flex-1 py-2 lg:py-4">
+    <main id="main" class="min-w-0 flex-1 py-2 lg:py-4" tabindex="-1">
       <router-outlet />
     </main>
   </div>
@@ -122,7 +129,7 @@
   @if (!isNavOpen()) {
     <button
       type="button"
-      class="fixed bottom-6 left-6 z-20 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-lg transition hover:border-slate-300 hover:text-slate-900 lg:hidden"
+      class="fixed bottom-6 left-6 z-20 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-lg transition hover:border-slate-300 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 lg:hidden"
       [attr.aria-expanded]="isNavOpen()"
       aria-controls="side-nav"
       (click)="toggleNav()"
