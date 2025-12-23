@@ -6,6 +6,7 @@ import { provideClientHydration, withEventReplay } from '@angular/platform-brows
 import { provideAudioSynth } from './core/di/audio-synth.provider';
 import { provideI18n } from './core/di/i18n.provider';
 import { provideHandLandmarker } from './core/di/hand-tracking.provider';
+import { provideRecorder } from './core/di/recorder.provider';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,6 +15,7 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideI18n(),
     provideAudioSynth(),
-    provideHandLandmarker()
+    provideHandLandmarker(),
+    provideRecorder()
   ]
 };

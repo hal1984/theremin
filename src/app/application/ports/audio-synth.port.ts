@@ -18,6 +18,7 @@ export interface AudioSynthPort {
   setPitchHz(hz: number): void;
   setGain(gain: number): void;
   setWaveform(type: AudioWaveform): void;
+  getOutputStream(): MediaStream | null;
 }
 
 export const AUDIO_SYNTH = new InjectionToken<AudioSynthPort>('AUDIO_SYNTH');

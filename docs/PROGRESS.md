@@ -33,10 +33,10 @@ Fecha de inicio: 2025-12-21
 - [x] Sliders sincronizados con el tracking
 
 ### Fase 3 — Grabación
-- [ ] Provider `provideRecorder({ ... })`
-- [ ] Adapter MediaRecorder (audio) + export + reproducción
-- [ ] Página `/recordings` conectada a grabaciones reales
-- [ ] Persistencia opcional (IndexedDB) + “Borrar todo”
+- [x] Provider `provideRecorder({ ... })`
+- [x] Adapter MediaRecorder (audio) + export + reproducción
+- [x] Página `/recordings` conectada a grabaciones reales
+- [x] Persistencia opcional (IndexedDB) + “Borrar todo”
 
 ### Fase 4 — Pulido + Deploy
 - [ ] Accesibilidad (AXE/WCAG AA): focus management, contraste, reduced motion

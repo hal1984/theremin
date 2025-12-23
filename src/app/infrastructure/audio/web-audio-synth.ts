@@ -7,6 +7,7 @@ type AudioNodes = {
   formantFilter: BiquadFilterNode;
   toneFilter: BiquadFilterNode;
   gainNode: GainNode;
+  recorderDestination: MediaStreamAudioDestinationNode;
   periodicWave: PeriodicWave;
 };
 
@@ -101,6 +102,14 @@ export class WebAudioSynth implements AudioSynthPort {
     }
   }
 
+  getOutputStream(): MediaStream | null {
+    if (!this.nodes) {
+      this.nodes = this.createNodes();
+    }
+
+    return this.nodes.recorderDestination.stream;
+  }
+
   private createNodes(): AudioNodes {
     const context = new AudioContext({ latencyHint: 'interactive' });
     const oscillator = context.createOscillator();
@@ -108,6 +117,7 @@ export class WebAudioSynth implements AudioSynthPort {
     const formantFilter = context.createBiquadFilter();
     const toneFilter = context.createBiquadFilter();
     const gainNode = context.createGain();
+    const recorderDestination = context.createMediaStreamDestination();
     const periodicWave = createThereminWave(context);
 
     if (this.waveform === 'custom') {
@@ -134,6 +144,7 @@ export class WebAudioSynth implements AudioSynthPort {
     formantFilter.connect(toneFilter);
     toneFilter.connect(gainNode);
     gainNode.connect(context.destination);
+    gainNode.connect(recorderDestination);
 
     oscillator.start();
 
@@ -144,6 +155,7 @@ export class WebAudioSynth implements AudioSynthPort {
       formantFilter,
       toneFilter,
       gainNode,
+      recorderDestination,
       periodicWave
     };
   }
@@ -192,5 +204,9 @@ export class NoopAudioSynth implements AudioSynthPort {
 
   setWaveform(): void {
     return;
+  }
+
+  getOutputStream(): MediaStream | null {
+    return null;
   }
 }

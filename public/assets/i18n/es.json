@@ -57,8 +57,13 @@
   "RECORDINGS": {
     "TAG": "Grabaciones",
     "TITLE": "Tus sesiones",
-    "DESCRIPTION": "Aquí aparecerán las grabaciones cuando activemos el recorder.",
+    "DESCRIPTION": "Tus grabaciones aparecen aquí para reproducirlas o compartirlas.",
+    "SESSION_TITLE": "Sesión {{id}}",
     "EMPTY": "No hay grabaciones todavía.",
+    "CLEAR_ALL": "Borrar todo",
+    "DELETE": "Borrar",
+    "CONFIRM_DELETE": "¿Borrar esta grabación?",
+    "CONFIRM_CLEAR": "¿Borrar todas las grabaciones?",
     "VIEW": "Ver",
     "ITEM_META": "{{seconds}} s · {{date}}"
   },

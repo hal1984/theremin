@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { RecordingsStore } from '../state/recordings.store';
 
@@ -15,8 +15,29 @@ import { RecordingsStore } from '../state/recordings.store';
 })
 export class RecordingsPage {
   readonly store = inject(RecordingsStore);
+  private readonly translate = inject(TranslateService);
+
+  constructor() {
+    void this.store.load();
+  }
 
   select(id: string): void {
     this.store.select(id);
+  }
+
+  remove(id: string): void {
+    const confirmed = window.confirm(this.translate.instant('RECORDINGS.CONFIRM_DELETE'));
+    if (!confirmed) {
+      return;
+    }
+    this.store.remove(id);
+  }
+
+  clear(): void {
+    const confirmed = window.confirm(this.translate.instant('RECORDINGS.CONFIRM_CLEAR'));
+    if (!confirmed) {
+      return;
+    }
+    this.store.clear();
   }
 }

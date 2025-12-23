@@ -2,6 +2,7 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 
 import { AUDIO_SYNTH } from '../../../application/ports/audio-synth.port';
+import { RECORDER } from '../../../application/ports/recorder.port';
 import { HAND_TRACKING } from '../../../application/ports/hand-tracking.port';
 import { mapPoseToThereminParams, smoothParams } from '../../../domain/theremin/mapping/map-pose-to-params';
 import {
@@ -9,6 +10,8 @@ import {
   ThereminParams
 } from '../../../domain/theremin/models/hand-tracking.model';
 import { SettingsStore } from '../../settings/state/settings.store';
+import { RecordingsStore } from '../../recordings/state/recordings.store';
+import { TranslateService } from '@ngx-translate/core';
 
 type PlayStatus = 'idle' | 'active' | 'error';
 type CameraPermission = 'unknown' | 'granted' | 'denied';
@@ -90,8 +93,11 @@ export const PlayStore = signalStore(
   })),
   withMethods((store) => {
     const audio = inject(AUDIO_SYNTH);
+    const recorder = inject(RECORDER);
     const tracking = inject(HAND_TRACKING);
     const settings = inject(SettingsStore);
+    const recordings = inject(RecordingsStore);
+    const translate = inject(TranslateService);
 
     let lastParams: ThereminParams = {
       pitchHz: store.pitchHz(),
@@ -122,6 +128,32 @@ export const PlayStore = signalStore(
           errorMessageKey: 'PLAY.ERROR_START_AUDIO'
         });
       }
+    };
+
+    const saveRecording = (clip: { blob: Blob; mimeType: string; durationMs: number }): void => {
+      const id = crypto.randomUUID();
+      const durationSeconds = Math.max(1, Math.round(clip.durationMs / 1000));
+      const createdAt = new Date();
+      const createdAtLabel = new Intl.DateTimeFormat(translate.currentLang || 'es', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit'
+      }).format(createdAt);
+      const audioUrl = URL.createObjectURL(clip.blob);
+
+      recordings.add(
+        {
+          id,
+          title: translate.instant('RECORDINGS.SESSION_TITLE', { id: id.slice(0, 4) }),
+          durationSeconds,
+          createdAtLabel,
+          createdAtMs: createdAt.getTime(),
+          audioUrl,
+          mimeType: clip.mimeType
+        },
+        clip.blob
+      );
     };
 
     const handleTrackingError = (error: unknown): void => {
@@ -196,13 +228,6 @@ export const PlayStore = signalStore(
       startPreview(video: HTMLVideoElement): void {
         void startTracking(video);
       },
-      stop(): void {
-        audio.stop();
-        patchState(store, {
-          status: 'idle',
-          isRecording: false
-        });
-      },
       stopTracking(): void {
         tracking.stop();
         patchState(store, {
@@ -219,7 +244,47 @@ export const PlayStore = signalStore(
           return;
         }
 
-        patchState(store, { isRecording: !store.isRecording() });
+        if (store.isRecording()) {
+          void (async () => {
+            const clip = await recorder.stop();
+            patchState(store, { isRecording: false });
+            if (!clip) {
+              return;
+            }
+
+            saveRecording(clip);
+          })();
+          return;
+        }
+
+        const stream = audio.getOutputStream();
+        if (!stream) {
+          patchState(store, {
+            errorMessageKey: 'PLAY.ERROR_START_AUDIO',
+            status: 'error'
+          });
+          return;
+        }
+
+        recorder.start(stream);
+        patchState(store, { isRecording: true });
+      },
+      stop(): void {
+        if (store.isRecording()) {
+          void (async () => {
+            const clip = await recorder.stop();
+            patchState(store, { isRecording: false });
+            if (clip) {
+              saveRecording(clip);
+            }
+          })();
+        }
+
+        audio.stop();
+        patchState(store, {
+          status: 'idle',
+          isRecording: false
+        });
       },
       setPitch(pitchHz: number): void {
         audio.setPitchHz(pitchHz);

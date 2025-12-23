@@ -57,8 +57,13 @@
   "RECORDINGS": {
     "TAG": "Recordings",
     "TITLE": "Your sessions",
-    "DESCRIPTION": "Recordings will appear here once we enable the recorder.",
+    "DESCRIPTION": "Your recordings appear here for playback or sharing.",
+    "SESSION_TITLE": "Session {{id}}",
     "EMPTY": "No recordings yet.",
+    "CLEAR_ALL": "Clear all",
+    "DELETE": "Delete",
+    "CONFIRM_DELETE": "Delete this recording?",
+    "CONFIRM_CLEAR": "Delete all recordings?",
     "VIEW": "View",
     "ITEM_META": "{{seconds}} s · {{date}}"
   },
