@@ -57,3 +57,15 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Compatibility
+
+- Requires HTTPS for camera access (getUserMedia).
+- Modern browser with Web Audio + MediaRecorder support.
+- Mobile browsers may require a user gesture to start audio.
+
+## Privacy
+
+- Camera frames are processed locally in the browser.
+- Audio is synthesized locally and recordings are stored in-browser (IndexedDB).
+- No media is uploaded by default.

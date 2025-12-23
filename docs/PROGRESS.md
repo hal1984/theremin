@@ -6,8 +6,8 @@ Fecha de inicio: 2025-12-21
 - ✅ Fase 0 completa (base del proyecto)
 - ✅ Fase 1 completa (audio + sliders accesibles)
 - ✅ Fase 2 completa (hand tracking)
-- ⏳ Fase 3 en cola (grabación real)
-- ⏳ Fase 4 en cola (pulido + deploy)
+- ✅ Fase 3 completa (grabación real)
+- ⏳ Fase 4 en progreso (pulido + deploy)
 
 ## Checklist por fase
 ### Fase 0 — Base del proyecto
@@ -41,8 +41,8 @@ Fecha de inicio: 2025-12-21
 ### Fase 4 — Pulido + Deploy
 - [ ] Accesibilidad (AXE/WCAG AA): focus management, contraste, reduced motion
 - [ ] Performance: evitar bloqueos UI, optimizar pipeline
-- [ ] Netlify: `netlify.toml` o `public/_redirects` (SPA), headers mínimos
-- [ ] Documentación final (compatibilidad, privacidad)
+- [x] Netlify: `netlify.toml` o `public/_redirects` (SPA), headers mínimos
+- [x] Documentación final (compatibilidad, privacidad)
 
 ## Notas
 - Versionado/estado de dependencias: si se cambia el enfoque de state management o hand tracking, actualizar también `docs/THEREMIN_HANDTRACKING_SPEC.md`.
