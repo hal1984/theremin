@@ -7,7 +7,7 @@ Fecha de inicio: 2025-12-21
 - ✅ Fase 1 completa (audio + sliders accesibles)
 - ✅ Fase 2 completa (hand tracking)
 - ✅ Fase 3 completa (grabación real)
-- ⏳ Fase 4 en progreso (pulido + deploy)
+- ✅ Fase 4 completa (pulido + deploy)
 
 ## Checklist por fase
 ### Fase 0 — Base del proyecto
@@ -39,7 +39,7 @@ Fecha de inicio: 2025-12-21
 - [x] Persistencia opcional (IndexedDB) + “Borrar todo”
 
 ### Fase 4 — Pulido + Deploy
-- [ ] Accesibilidad (AXE/WCAG AA): focus management, contraste, reduced motion
+- [x] Accesibilidad (AXE/WCAG AA): focus management, contraste, reduced motion
 - [x] Performance: evitar bloqueos UI, optimizar pipeline
 - [x] Netlify: `netlify.toml` o `public/_redirects` (SPA), headers mínimos
 - [x] Documentación final (compatibilidad, privacidad)
