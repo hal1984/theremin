@@ -1,4 +1,4 @@
-# Theremin — Progreso
+# Joya's Theremin — Progreso
 
 Fecha de inicio: 2025-12-21
 

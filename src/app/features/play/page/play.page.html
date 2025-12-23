@@ -87,7 +87,7 @@
           [attr.aria-label]="'PLAY.PITCH_ARIA' | translate"
         />
         <span class="text-xs font-semibold text-slate-500">
-          {{ store.pitchNoteLabel() }} · {{ controls.pitch().value() }} {{ 'COMMON.HZ' | translate }}
+          {{ store.pitchNoteLabel() }} · {{ controls.pitch().value().toPrecision(3) }} {{ 'COMMON.HZ' | translate }}
         </span>
       </label>
       <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">

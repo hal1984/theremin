@@ -14,7 +14,7 @@
     "MS": "ms"
   },
   "APP": {
-    "TITLE": "Theremin Lab",
+    "TITLE": "Joya's Theremin",
     "SUBTITLE": "Control por manos + audio en tiempo real",
     "FOOTER": "Hecho para iterar: fase 0 lista, siguiente paso audio y tracking."
   },
@@ -86,6 +86,7 @@
     "TAG": "Sobre",
     "TITLE": "Theremin por webcam",
     "DESCRIPTION": "Esta app procesa el video de la cámara en tu dispositivo. No sube video ni audio a un servidor por defecto.",
+    "IMAGE_ALT": "Joya tocando el theremin",
     "COMPAT_TITLE": "Compatibilidad",
     "COMPAT_DESC": "Necesitas HTTPS y un navegador moderno con soporte de Web Audio y getUserMedia."
   }

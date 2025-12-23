@@ -17,7 +17,7 @@ const initialState: SettingsState = {
   maxHz: 600,
   smoothingMs: 40,
   swapHands: false,
-  quantize: false,
+  quantize: true,
   volumeCurve: 'expo'
 };
 

@@ -14,7 +14,7 @@
     "MS": "ms"
   },
   "APP": {
-    "TITLE": "Theremin Lab",
+    "TITLE": "Joya's Theremin",
     "SUBTITLE": "Hand tracking + real-time audio",
     "FOOTER": "Built to iterate: phase 0 done, next audio and tracking."
   },
@@ -86,6 +86,7 @@
     "TAG": "About",
     "TITLE": "Webcam theremin",
     "DESCRIPTION": "This app processes video on your device. It does not upload video or audio by default.",
+    "IMAGE_ALT": "Joya playing the theremin",
     "COMPAT_TITLE": "Compatibility",
     "COMPAT_DESC": "HTTPS is required, plus a modern browser with Web Audio and getUserMedia."
   }
