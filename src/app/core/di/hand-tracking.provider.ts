@@ -10,7 +10,7 @@ import {
 import { MediaPipeHandTracker, NoopHandTracker } from '../../infrastructure/vision/mediapipe-hand-tracker';
 
 const defaultConfig: HandTrackingConfig = {
-  wasmBasePath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm',
+  wasmBasePath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21/wasm',
   modelAssetPath:
     'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
   maxHands: 2,

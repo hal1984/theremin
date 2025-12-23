@@ -55,16 +55,16 @@
 }
 
 .joya-splash__image {
-  width: min(100vw, 1200px);
-  max-height: 70vh;
+  width: auto;
   height: auto;
+  max-height: min(86vh, 720px);
+  max-width: calc(100vw - 2rem);
   border-radius: 26px;
   border: 2px solid rgba(248, 250, 252, 0.5);
   box-shadow: 0 35px 80px rgba(15, 23, 42, 0.65);
   filter: saturate(1.2) contrast(1.1);
   transform-origin: center;
-  animation: joya-splash-image 2.2s ease-in-out forwards;
-  object-fit: cover;
+  animation: joya-splash-image 4s ease-in-out forwards;
 }
 
 .joya-splash__title {
