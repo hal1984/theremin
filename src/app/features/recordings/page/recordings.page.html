@@ -21,7 +21,7 @@
     <div class="flex justify-end">
       <button
         type="button"
-        class="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+        class="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
         (click)="clear()"
       >
         {{ 'RECORDINGS.CLEAR_ALL' | translate }}
@@ -42,14 +42,14 @@
             </div>
             <button
               type="button"
-              class="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700"
+              class="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
               (click)="select(item.id)"
             >
               {{ 'RECORDINGS.VIEW' | translate }}
             </button>
             <button
               type="button"
-              class="rounded-full border border-rose-200 px-4 py-2 text-xs font-semibold text-rose-700"
+              class="rounded-full border border-rose-200 px-4 py-2 text-xs font-semibold text-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
               (click)="remove(item.id)"
             >
               {{ 'RECORDINGS.DELETE' | translate }}
