@@ -55,7 +55,8 @@
 }
 
 .joya-splash__image {
-  width: min(70vw, 560px);
+  width: min(100vw, 1200px);
+  max-height: 70vh;
   height: auto;
   border-radius: 26px;
   border: 2px solid rgba(248, 250, 252, 0.5);
@@ -63,6 +64,7 @@
   filter: saturate(1.2) contrast(1.1);
   transform-origin: center;
   animation: joya-splash-image 2.2s ease-in-out forwards;
+  object-fit: cover;
 }
 
 .joya-splash__title {

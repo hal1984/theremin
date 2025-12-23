@@ -113,6 +113,9 @@
       [class.animate-pulse]="store.shouldPulseStart()"
       [class.ring-2]="store.shouldPulseStart()"
       [class.ring-slate-900/40]="store.shouldPulseStart()"
+      [class.ring-offset-2]="store.shouldPulseStart()"
+      [class.ring-rose-400/80]="store.shouldPulseStart()"
+      [class.joya-pulse]="store.shouldPulseStart()"
       [disabled]="!store.canStart()"
       (click)="start()"
     >
@@ -120,7 +123,7 @@
     </button>
     <button
       type="button"
-      class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 shadow-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+      class="rounded-full border border-slate-300 bg-slate-200/90 px-5 py-3 text-sm font-semibold text-slate-600 shadow-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
       [disabled]="!store.isActive()"
       (click)="stop()"
     >
