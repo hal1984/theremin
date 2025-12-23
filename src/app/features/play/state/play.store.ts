@@ -104,6 +104,7 @@ export const PlayStore = signalStore(
       gain: store.gain()
     };
     let lastTimestamp = 0;
+    let lastUiTimestamp = 0;
 
     const startAudio = async (): Promise<void> => {
       try {
@@ -192,11 +193,18 @@ export const PlayStore = signalStore(
 
       lastParams = smoothed;
       lastTimestamp = frame.timestampMs;
-
-      patchState(store, { lastFrame: frame });
       audio.setPitchHz(smoothed.pitchHz);
       audio.setGain(smoothed.gain);
-      patchState(store, { pitchHz: smoothed.pitchHz, gain: smoothed.gain });
+
+      const uiIntervalMs = 1000 / 30;
+      if (!lastUiTimestamp || frame.timestampMs - lastUiTimestamp >= uiIntervalMs) {
+        lastUiTimestamp = frame.timestampMs;
+        patchState(store, {
+          lastFrame: frame,
+          pitchHz: smoothed.pitchHz,
+          gain: smoothed.gain
+        });
+      }
     };
 
     const startTracking = async (video: HTMLVideoElement): Promise<void> => {

@@ -36,6 +36,7 @@ export class PlayPage implements OnDestroy {
 
   private readonly overlayRef = viewChild<ElementRef<HTMLCanvasElement>>('overlay');
   readonly cameraAspect = signal(16 / 9);
+  private overlayCache: { canvas: HTMLCanvasElement; width: number; height: number } | null = null;
 
   readonly model = signal({
     pitch: this.store.pitchHz(),
@@ -140,6 +141,7 @@ export class PlayPage implements OnDestroy {
     if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
+      this.overlayCache = null;
     }
 
     const ctx = canvas.getContext('2d');
@@ -148,13 +150,12 @@ export class PlayPage implements OnDestroy {
     }
 
     ctx.clearRect(0, 0, width, height);
-    try {
-      ctx.drawImage(video, 0, 0, width, height);
-    } catch {
-      // Ignore draw errors if the video frame is not ready yet.
+    const overlayCanvas = this.getOverlayCanvas(width, height);
+    if (overlayCanvas) {
+      ctx.drawImage(overlayCanvas, 0, 0);
+    } else {
+      this.drawThereminOverlay(ctx, width, height);
     }
-
-    this.drawThereminOverlay(ctx, width, height);
 
     frame.hands.forEach((hand) => {
       ctx.fillStyle = hand.handedness === 'Left' ? '#22c55e' : '#38bdf8';
@@ -486,6 +487,27 @@ export class PlayPage implements OnDestroy {
 
     ctx.restore();
     ctx.restore();
+  }
+
+  private getOverlayCanvas(width: number, height: number): HTMLCanvasElement | null {
+    if (!this.isBrowser) {
+      return null;
+    }
+
+    if (!this.overlayCache || this.overlayCache.width !== width || this.overlayCache.height !== height) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return null;
+      }
+
+      this.drawThereminOverlay(ctx, width, height);
+      this.overlayCache = { canvas, width, height };
+    }
+
+    return this.overlayCache.canvas;
   }
 
   private attachAspectListener(video: HTMLVideoElement): void {

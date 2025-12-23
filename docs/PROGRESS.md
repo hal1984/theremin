@@ -40,7 +40,7 @@ Fecha de inicio: 2025-12-21
 
 ### Fase 4 — Pulido + Deploy
 - [ ] Accesibilidad (AXE/WCAG AA): focus management, contraste, reduced motion
-- [ ] Performance: evitar bloqueos UI, optimizar pipeline
+- [x] Performance: evitar bloqueos UI, optimizar pipeline
 - [x] Netlify: `netlify.toml` o `public/_redirects` (SPA), headers mínimos
 - [x] Documentación final (compatibilidad, privacidad)
 
