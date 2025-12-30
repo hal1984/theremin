@@ -98,6 +98,8 @@ export const PlayStore = signalStore(
     const settings = inject(SettingsStore);
     const recordings = inject(RecordingsStore);
     const translate = inject(TranslateService);
+    const isDocumentHidden = (): boolean =>
+      typeof document !== 'undefined' && document.visibilityState === 'hidden';
 
     let lastParams: ThereminParams = {
       pitchHz: store.pitchHz(),
@@ -195,6 +197,11 @@ export const PlayStore = signalStore(
       lastTimestamp = frame.timestampMs;
       audio.setPitchHz(smoothed.pitchHz);
       audio.setGain(smoothed.gain);
+
+      if (isDocumentHidden()) {
+        lastUiTimestamp = frame.timestampMs;
+        return;
+      }
 
       const uiIntervalMs = 1000 / 30;
       if (!lastUiTimestamp || frame.timestampMs - lastUiTimestamp >= uiIntervalMs) {

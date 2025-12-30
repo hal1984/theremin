@@ -17,6 +17,30 @@ import { PlayStore } from '../state/play.store';
 import { SettingsStore } from '../../settings/state/settings.store';
 import { HandTrackingFrame } from '../../../domain/theremin/models/hand-tracking.model';
 
+const HAND_CONNECTIONS: Array<[number, number]> = [
+  [0, 1],
+  [1, 2],
+  [2, 3],
+  [3, 4],
+  [0, 5],
+  [5, 6],
+  [6, 7],
+  [7, 8],
+  [5, 9],
+  [9, 10],
+  [10, 11],
+  [11, 12],
+  [9, 13],
+  [13, 14],
+  [14, 15],
+  [15, 16],
+  [13, 17],
+  [17, 18],
+  [18, 19],
+  [19, 20],
+  [0, 17]
+];
+
 @Component({
   selector: 'app-play-page',
   imports: [Field, TranslatePipe],
@@ -132,6 +156,10 @@ export class PlayPage implements OnDestroy {
       return;
     }
 
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+      return;
+    }
+
     const width = video.videoWidth || video.clientWidth;
     const height = video.videoHeight || video.clientHeight;
     if (!width || !height) {
@@ -162,31 +190,7 @@ export class PlayPage implements OnDestroy {
       ctx.strokeStyle = ctx.fillStyle;
       ctx.lineWidth = 2;
 
-      const connections: Array<[number, number]> = [
-        [0, 1],
-        [1, 2],
-        [2, 3],
-        [3, 4],
-        [0, 5],
-        [5, 6],
-        [6, 7],
-        [7, 8],
-        [5, 9],
-        [9, 10],
-        [10, 11],
-        [11, 12],
-        [9, 13],
-        [13, 14],
-        [14, 15],
-        [15, 16],
-        [13, 17],
-        [17, 18],
-        [18, 19],
-        [19, 20],
-        [0, 17]
-      ];
-
-      connections.forEach(([from, to]) => {
+      HAND_CONNECTIONS.forEach(([from, to]) => {
         const a = hand.landmarks[from];
         const b = hand.landmarks[to];
         if (!a || !b) {
