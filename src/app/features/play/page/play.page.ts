@@ -10,7 +10,7 @@ import {
   signal,
   viewChild
 } from '@angular/core';
-import { Field, MAX, MIN, form, metadata, schema } from '@angular/forms/signals';
+import { FormField, MAX, MIN, form, metadata, schema } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { PlayStore } from '../state/play.store';
@@ -43,7 +43,7 @@ const HAND_CONNECTIONS: Array<[number, number]> = [
 
 @Component({
   selector: 'app-play-page',
-  imports: [Field, TranslatePipe],
+  imports: [FormField, TranslatePipe],
   templateUrl: './play.page.html',
   styleUrl: './play.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

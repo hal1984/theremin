@@ -82,7 +82,7 @@
         <input
           type="range"
           class="h-2 w-full cursor-pointer accent-slate-900"
-          [field]="controls.pitch"
+          [formField]="controls.pitch"
           step="1"
           [attr.aria-label]="'PLAY.PITCH_ARIA' | translate"
         />
@@ -95,7 +95,7 @@
         <input
           type="range"
           class="h-2 w-full cursor-pointer accent-slate-900"
-          [field]="controls.gain"
+          [formField]="controls.gain"
           step="0.01"
           [attr.aria-label]="'PLAY.GAIN_ARIA' | translate"
         />

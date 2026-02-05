@@ -1,18 +1,21 @@
 import { Injectable } from '@angular/core';
-import { TranslateLoader } from '@ngx-translate/core';
+import { TranslateLoader, type TranslationObject } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 @Injectable({ providedIn: 'root' })
 export class ServerTranslateLoader implements TranslateLoader {
-  getTranslation(lang: string): Observable<Record<string, unknown>> {
+  getTranslation(lang: string): Observable<TranslationObject> {
     try {
       const filePath = join(process.cwd(), 'public', 'assets', 'i18n', `${lang}.json`);
       const raw = readFileSync(filePath, 'utf-8');
-      const json = JSON.parse(raw) as Record<string, unknown>;
+      const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') {
+        return of({});
+      }
 
-      return of(json);
+      return of(parsed as TranslationObject);
     } catch {
       return of({});
     }
