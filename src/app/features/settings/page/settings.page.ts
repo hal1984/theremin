@@ -10,15 +10,15 @@ import { SettingsStore } from '../state/settings.store';
   styleUrl: './settings.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'block'
-  }
+    class: 'block',
+  },
 })
 export class SettingsPage {
   readonly store = inject(SettingsStore);
 
   nudgeRange(delta: number): void {
-    const minHz = Math.max(20, this.store.minHz() + delta);
-    const maxHz = Math.max(minHz + 40, this.store.maxHz() + delta);
+    const minHz = Math.max(20, this.store.minHz() + delta),
+      maxHz = Math.max(minHz + 40, this.store.maxHz() + delta);
     this.store.setRange(minHz, maxHz);
   }
 

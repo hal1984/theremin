@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { TranslateLoader, type TranslationObject } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import type { TranslateLoader } from '@ngx-translate/core';
+import type { TranslationObject } from '@ngx-translate/core';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })

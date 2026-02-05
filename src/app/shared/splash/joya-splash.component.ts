@@ -9,8 +9,8 @@ import { TranslatePipe } from '@ngx-translate/core';
   styleUrl: './joya-splash.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'block'
-  }
+    class: 'block',
+  },
 })
 export class JoyaSplashComponent {
   readonly active = input(false);

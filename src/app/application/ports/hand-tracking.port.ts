@@ -1,7 +1,7 @@
 import { InjectionToken } from '@angular/core';
-import { HandTrackingFrame } from '../../domain/theremin/models/hand-tracking.model';
+import type { HandTrackingFrame } from '../../domain/theremin/models/hand-tracking.model';
 
-export type HandTrackingConfig = {
+export interface HandTrackingConfig {
   wasmBasePath: string;
   modelAssetPath: string;
   maxHands: number;
@@ -11,18 +11,18 @@ export type HandTrackingConfig = {
   targetFps: number;
   videoWidth: number;
   videoHeight: number;
-};
+}
 
-export type HandTrackingStartOptions = {
+export interface HandTrackingStartOptions {
   video: HTMLVideoElement;
   onFrame: (frame: HandTrackingFrame) => void;
   onError?: (error: unknown) => void;
-};
+}
 
 export interface HandTrackingPort {
-  start(options: HandTrackingStartOptions): Promise<void>;
-  stop(): void;
-  isRunning(): boolean;
+  start: (options: HandTrackingStartOptions) => Promise<void>;
+  stop: () => void;
+  isRunning: () => boolean;
 }
 
 export const HAND_TRACKING_CONFIG = new InjectionToken<HandTrackingConfig>('HAND_TRACKING_CONFIG');

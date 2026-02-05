@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { TranslateLoader, provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { App } from './app';
@@ -54,8 +54,8 @@ describe('App', () => {
   });
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
+    const fixture = TestBed.createComponent(App),
+      app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 

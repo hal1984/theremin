@@ -14,8 +14,8 @@ import { JoyaSplashComponent } from './shared/splash/joya-splash.component';
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'block min-h-dvh bg-slate-100 text-slate-900'
-  }
+    class: 'block min-h-dvh bg-slate-100 text-slate-900',
+  },
 })
 export class App {
   private readonly platformId = inject(PLATFORM_ID);
@@ -24,15 +24,14 @@ export class App {
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      map((event) => event.urlAfterRedirects)
+      map((event) => event.urlAfterRedirects),
     ),
-    { initialValue: this.router.url }
+    { initialValue: this.router.url },
   );
 
-  readonly currentLang = toSignal(
-    this.translate.onLangChange.pipe(map((event) => event.lang)),
-    { initialValue: this.translate.currentLang || 'es' }
-  );
+  readonly currentLang = toSignal(this.translate.onLangChange.pipe(map((event) => event.lang)), {
+    initialValue: this.translate.currentLang || 'es',
+  });
   readonly isNavOpen = signal(false);
   readonly showSplash = signal(true);
 
@@ -44,9 +43,11 @@ export class App {
   constructor() {
     this.translate.use('es');
     if (isPlatformBrowser(this.platformId)) {
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const durationMs = prefersReducedMotion ? 1200 : 4200;
-      window.setTimeout(() => this.showSplash.set(false), durationMs);
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+        durationMs = prefersReducedMotion ? 1200 : 4200;
+      window.setTimeout(() => {
+        this.showSplash.set(false);
+      }, durationMs);
     }
   }
 

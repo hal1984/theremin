@@ -1,6 +1,10 @@
-import { AudioSynthConfig, AudioSynthPort, AudioWaveform } from '../../application/ports/audio-synth.port';
+import type {
+  AudioSynthConfig,
+  AudioSynthPort,
+  AudioWaveform,
+} from '../../application/ports/audio-synth.port';
 
-type AudioNodes = {
+interface AudioNodes {
   context: AudioContext;
   oscillator: OscillatorNode;
   shaper: WaveShaperNode;
@@ -9,33 +13,32 @@ type AudioNodes = {
   gainNode: GainNode;
   recorderDestination: MediaStreamAudioDestinationNode;
   periodicWave: PeriodicWave;
-};
+}
 
-const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
-const createSaturationCurve = (amount: number): Float32Array<ArrayBuffer> => {
-  const k = clamp(amount, 0, 1) * 50;
-  const samples = 1024;
-  const curve = new Float32Array(new ArrayBuffer(samples * Float32Array.BYTES_PER_ELEMENT));
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max),
+  createSaturationCurve = (amount: number): Float32Array<ArrayBuffer> => {
+    const k = clamp(amount, 0, 1) * 50,
+      samples = 1024,
+      curve = new Float32Array(new ArrayBuffer(samples * Float32Array.BYTES_PER_ELEMENT));
 
-  for (let i = 0; i < samples; i += 1) {
-    const x = (i * 2) / samples - 1;
-    curve[i] = ((1 + k) * x) / (1 + k * Math.abs(x));
-  }
+    for (let i = 0; i < samples; i += 1) {
+      const x = (i * 2) / samples - 1;
+      curve[i] = ((1 + k) * x) / (1 + k * Math.abs(x));
+    }
 
-  return curve;
-};
+    return curve;
+  },
+  createThereminWave = (context: AudioContext): PeriodicWave => {
+    const harmonics = [1, 0.35, 0.22, 0.12, 0.08, 0.05, 0.03, 0.02],
+      real = new Float32Array(harmonics.length + 1),
+      imag = new Float32Array(harmonics.length + 1);
 
-const createThereminWave = (context: AudioContext): PeriodicWave => {
-  const harmonics = [1, 0.35, 0.22, 0.12, 0.08, 0.05, 0.03, 0.02];
-  const real = new Float32Array(harmonics.length + 1);
-  const imag = new Float32Array(harmonics.length + 1);
+    harmonics.forEach((amp, index) => {
+      imag[index + 1] = amp;
+    });
 
-  harmonics.forEach((amp, index) => {
-    imag[index + 1] = amp;
-  });
-
-  return context.createPeriodicWave(real, imag, { disableNormalization: true });
-};
+    return context.createPeriodicWave(real, imag, { disableNormalization: true });
+  };
 
 export class WebAudioSynth implements AudioSynthPort {
   private nodes: AudioNodes | null = null;
@@ -111,14 +114,14 @@ export class WebAudioSynth implements AudioSynthPort {
   }
 
   private createNodes(): AudioNodes {
-    const context = new AudioContext({ latencyHint: 'interactive' });
-    const oscillator = context.createOscillator();
-    const shaper = context.createWaveShaper();
-    const formantFilter = context.createBiquadFilter();
-    const toneFilter = context.createBiquadFilter();
-    const gainNode = context.createGain();
-    const recorderDestination = context.createMediaStreamDestination();
-    const periodicWave = createThereminWave(context);
+    const context = new AudioContext({ latencyHint: 'interactive' }),
+      oscillator = context.createOscillator(),
+      shaper = context.createWaveShaper(),
+      formantFilter = context.createBiquadFilter(),
+      toneFilter = context.createBiquadFilter(),
+      gainNode = context.createGain(),
+      recorderDestination = context.createMediaStreamDestination(),
+      periodicWave = createThereminWave(context);
 
     if (this.waveform === 'custom') {
       oscillator.setPeriodicWave(periodicWave);
@@ -156,7 +159,7 @@ export class WebAudioSynth implements AudioSynthPort {
       toneFilter,
       gainNode,
       recorderDestination,
-      periodicWave
+      periodicWave,
     };
   }
 
@@ -165,8 +168,8 @@ export class WebAudioSynth implements AudioSynthPort {
       return;
     }
 
-    const now = this.nodes.context.currentTime;
-    const smoothing = this.config.pitchSmoothingMs / 1000;
+    const now = this.nodes.context.currentTime,
+      smoothing = this.config.pitchSmoothingMs / 1000;
 
     this.nodes.oscillator.frequency.cancelScheduledValues(now);
     this.nodes.oscillator.frequency.setTargetAtTime(value, now, smoothing || 0.001);
@@ -177,8 +180,8 @@ export class WebAudioSynth implements AudioSynthPort {
       return;
     }
 
-    const now = this.nodes.context.currentTime;
-    const smoothing = this.config.gainSmoothingMs / 1000;
+    const now = this.nodes.context.currentTime,
+      smoothing = this.config.gainSmoothingMs / 1000;
 
     this.nodes.gainNode.gain.cancelScheduledValues(now);
     this.nodes.gainNode.gain.setTargetAtTime(value, now, smoothing || 0.001);
@@ -186,25 +189,15 @@ export class WebAudioSynth implements AudioSynthPort {
 }
 
 export class NoopAudioSynth implements AudioSynthPort {
-  async start(): Promise<void> {
-    return;
-  }
+  async start(): Promise<void> {}
 
-  stop(): void {
-    return;
-  }
+  stop(): void {}
 
-  setPitchHz(): void {
-    return;
-  }
+  setPitchHz(): void {}
 
-  setGain(): void {
-    return;
-  }
+  setGain(): void {}
 
-  setWaveform(): void {
-    return;
-  }
+  setWaveform(): void {}
 
   getOutputStream(): MediaStream | null {
     return null;

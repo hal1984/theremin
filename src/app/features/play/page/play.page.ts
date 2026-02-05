@@ -1,21 +1,20 @@
 import { isPlatformBrowser } from '@angular/common';
+import type { ElementRef, OnDestroy } from '@angular/core';
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
-  OnDestroy,
   PLATFORM_ID,
   effect,
   inject,
   signal,
-  viewChild
+  viewChild,
 } from '@angular/core';
 import { FormField, MAX, MIN, form, metadata, schema } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { PlayStore } from '../state/play.store';
 import { SettingsStore } from '../../settings/state/settings.store';
-import { HandTrackingFrame } from '../../../domain/theremin/models/hand-tracking.model';
+import type { HandTrackingFrame } from '../../../domain/theremin/models/hand-tracking.model';
 
 const HAND_CONNECTIONS: [number, number][] = [
   [0, 1],
@@ -38,7 +37,7 @@ const HAND_CONNECTIONS: [number, number][] = [
   [17, 18],
   [18, 19],
   [19, 20],
-  [0, 17]
+  [0, 17],
 ];
 
 @Component({
@@ -48,8 +47,8 @@ const HAND_CONNECTIONS: [number, number][] = [
   styleUrl: './play.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'block'
-  }
+    class: 'block',
+  },
 })
 export class PlayPage implements OnDestroy {
   readonly store = inject(PlayStore);
@@ -64,7 +63,7 @@ export class PlayPage implements OnDestroy {
 
   readonly model = signal({
     pitch: this.store.pitchHz(),
-    gain: this.store.gain()
+    gain: this.store.gain(),
   });
   private readonly formSchema = schema<{ pitch: number; gain: number }>((path) => {
     metadata(path.pitch, MIN, () => this.settings.minHz());
@@ -84,8 +83,8 @@ export class PlayPage implements OnDestroy {
     });
 
     effect(() => {
-      const pitch = this.store.pitchHz();
-      const gain = this.store.gain();
+      const pitch = this.store.pitchHz(),
+        gain = this.store.gain();
       this.model.update((current) => {
         if (Math.abs(current.pitch - pitch) < 0.01 && Math.abs(current.gain - gain) < 0.005) {
           return current;
@@ -111,9 +110,9 @@ export class PlayPage implements OnDestroy {
         return;
       }
 
-      const frame = this.store.lastFrame();
-      const canvasRef = this.overlayRef();
-      const videoRef = this.cameraRef();
+      const frame = this.store.lastFrame(),
+        canvasRef = this.overlayRef(),
+        videoRef = this.cameraRef();
 
       if (!frame || !canvasRef || !videoRef) {
         this.clearOverlay(canvasRef?.nativeElement);
@@ -150,7 +149,7 @@ export class PlayPage implements OnDestroy {
   private drawOverlay(
     frame: HandTrackingFrame,
     canvas: HTMLCanvasElement,
-    video: HTMLVideoElement
+    video: HTMLVideoElement,
   ): void {
     if (!this.isBrowser) {
       return;
@@ -160,8 +159,8 @@ export class PlayPage implements OnDestroy {
       return;
     }
 
-    const width = video.videoWidth || video.clientWidth;
-    const height = video.videoHeight || video.clientHeight;
+    const width = video.videoWidth || video.clientWidth,
+      height = video.videoHeight || video.clientHeight;
     if (!width || !height) {
       return;
     }
@@ -191,8 +190,8 @@ export class PlayPage implements OnDestroy {
       ctx.lineWidth = 2;
 
       HAND_CONNECTIONS.forEach(([from, to]) => {
-        const a = hand.landmarks[from];
-        const b = hand.landmarks[to];
+        const a = hand.landmarks[from],
+          b = hand.landmarks[to];
         if (!a || !b) {
           return;
         }
@@ -234,80 +233,75 @@ export class PlayPage implements OnDestroy {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  private drawThereminOverlay(
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number
-  ): void {
-    const clamp = (value: number, min: number, max: number) =>
-      Math.min(Math.max(value, min), max);
+  private drawThereminOverlay(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+    const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max),
+      roundRectPath = (x: number, y: number, w: number, h: number, r: number) => {
+        const radius = clamp(r, 0, Math.min(w, h) / 2),
+          anyCtx = ctx as CanvasRenderingContext2D & {
+            roundRect?: (
+              x: number,
+              y: number,
+              w: number,
+              h: number,
+              radii: number | number[],
+            ) => void;
+          };
+        ctx.beginPath();
+        if (anyCtx.roundRect) {
+          anyCtx.roundRect(x, y, w, h, radius);
+          return;
+        }
 
-    const roundRectPath = (x: number, y: number, w: number, h: number, r: number) => {
-      const radius = clamp(r, 0, Math.min(w, h) / 2);
-      const anyCtx = ctx as CanvasRenderingContext2D & {
-        roundRect?: (x: number, y: number, w: number, h: number, radii: number | number[]) => void;
-      };
-      ctx.beginPath();
-      if (anyCtx.roundRect) {
-        anyCtx.roundRect(x, y, w, h, radius);
-        return;
-      }
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + w, y, x + w, y + h, radius);
+        ctx.arcTo(x + w, y + h, x, y + h, radius);
+        ctx.arcTo(x, y + h, x, y, radius);
+        ctx.arcTo(x, y, x + w, y, radius);
+        ctx.closePath();
+      },
+      drawKnob = (x: number, y: number, radius: number, angleRadians: number): void => {
+        const body = ctx.createRadialGradient(
+          x - radius * 0.35,
+          y - radius * 0.35,
+          radius * 0.2,
+          x,
+          y,
+          radius,
+        );
+        body.addColorStop(0, 'rgba(248,250,252,0.92)');
+        body.addColorStop(0.55, 'rgba(148,163,184,0.92)');
+        body.addColorStop(1, 'rgba(51,65,85,0.92)');
 
-      ctx.moveTo(x + radius, y);
-      ctx.arcTo(x + w, y, x + w, y + h, radius);
-      ctx.arcTo(x + w, y + h, x, y + h, radius);
-      ctx.arcTo(x, y + h, x, y, radius);
-      ctx.arcTo(x, y, x + w, y, radius);
-      ctx.closePath();
-    };
+        ctx.save();
+        ctx.fillStyle = body;
+        ctx.strokeStyle = 'rgba(15,23,42,0.55)';
+        ctx.lineWidth = Math.max(1, radius * 0.18);
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
 
-    const drawKnob = (
-      x: number,
-      y: number,
-      radius: number,
-      angleRadians: number
-    ): void => {
-      const body = ctx.createRadialGradient(
-        x - radius * 0.35,
-        y - radius * 0.35,
-        radius * 0.2,
-        x,
-        y,
-        radius
-      );
-      body.addColorStop(0, 'rgba(248,250,252,0.92)');
-      body.addColorStop(0.55, 'rgba(148,163,184,0.92)');
-      body.addColorStop(1, 'rgba(51,65,85,0.92)');
-
-      ctx.save();
-      ctx.fillStyle = body;
-      ctx.strokeStyle = 'rgba(15,23,42,0.55)';
-      ctx.lineWidth = Math.max(1, radius * 0.18);
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      // Pointer
-      const pointerLen = radius * 0.9;
-      ctx.strokeStyle = 'rgba(15,23,42,0.7)';
-      ctx.lineWidth = Math.max(1, radius * 0.14);
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + Math.cos(angleRadians) * pointerLen, y + Math.sin(angleRadians) * pointerLen);
-      ctx.stroke();
-      ctx.restore();
-    };
-
-    const paddingY = Math.min(height * 0.1, 64);
-    const cabinetW = clamp(width * 0.78, 260, width * 0.92);
-    const cabinetH = clamp(height * 0.24, 120, 190);
-    const cabinetX = (width - cabinetW) / 2;
-    const cabinetY = height - paddingY - cabinetH;
-    const cabinetRadius = clamp(cabinetH * 0.18, 14, 24);
-
-    const pitchRodX = cabinetX + cabinetW * 0.18;
-    const volumeLoopX = cabinetX + cabinetW * 0.82;
+        // Pointer
+        const pointerLen = radius * 0.9;
+        ctx.strokeStyle = 'rgba(15,23,42,0.7)';
+        ctx.lineWidth = Math.max(1, radius * 0.14);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(
+          x + Math.cos(angleRadians) * pointerLen,
+          y + Math.sin(angleRadians) * pointerLen,
+        );
+        ctx.stroke();
+        ctx.restore();
+      },
+      paddingY = Math.min(height * 0.1, 64),
+      cabinetW = clamp(width * 0.78, 260, width * 0.92),
+      cabinetH = clamp(height * 0.24, 120, 190),
+      cabinetX = (width - cabinetW) / 2,
+      cabinetY = height - paddingY - cabinetH,
+      cabinetRadius = clamp(cabinetH * 0.18, 14, 24),
+      pitchRodX = cabinetX + cabinetW * 0.18,
+      volumeLoopX = cabinetX + cabinetW * 0.82;
 
     ctx.save();
     ctx.globalAlpha = 0.82;
@@ -326,7 +320,7 @@ export class PlayPage implements OnDestroy {
       cabinetH * 0.18,
       0,
       0,
-      Math.PI * 2
+      Math.PI * 2,
     );
     ctx.fill();
     ctx.restore();
@@ -365,14 +359,13 @@ export class PlayPage implements OnDestroy {
     ctx.fill();
 
     // Control panel plate
-    const panelMargin = cabinetW * 0.08;
-    const panelH = cabinetH * 0.44;
-    const panelX = cabinetX + panelMargin;
-    const panelY = cabinetY + cabinetH * 0.12;
-    const panelW = cabinetW - panelMargin * 2;
-    const panelR = clamp(cabinetRadius * 0.8, 10, 18);
-
-    const metal = ctx.createLinearGradient(panelX, panelY, panelX, panelY + panelH);
+    const panelMargin = cabinetW * 0.08,
+      panelH = cabinetH * 0.44,
+      panelX = cabinetX + panelMargin,
+      panelY = cabinetY + cabinetH * 0.12,
+      panelW = cabinetW - panelMargin * 2,
+      panelR = clamp(cabinetRadius * 0.8, 10, 18),
+      metal = ctx.createLinearGradient(panelX, panelY, panelX, panelY + panelH);
     metal.addColorStop(0, 'rgba(226,232,240,0.92)');
     metal.addColorStop(0.28, 'rgba(148,163,184,0.92)');
     metal.addColorStop(0.6, 'rgba(241,245,249,0.86)');
@@ -386,24 +379,24 @@ export class PlayPage implements OnDestroy {
     ctx.stroke();
 
     // Knobs row
-    const knobY = panelY + panelH * 0.62;
-    const knobR = clamp(panelH * 0.22, 10, 18);
-    const knobXs = [
-      panelX + panelW * 0.18,
-      panelX + panelW * 0.38,
-      panelX + panelW * 0.58,
-      panelX + panelW * 0.78,
-    ];
+    const knobY = panelY + panelH * 0.62,
+      knobR = clamp(panelH * 0.22, 10, 18),
+      knobXs = [
+        panelX + panelW * 0.18,
+        panelX + panelW * 0.38,
+        panelX + panelW * 0.58,
+        panelX + panelW * 0.78,
+      ];
     knobXs.forEach((x, index) => {
-      drawKnob(x, knobY, knobR, (-Math.PI / 2) + index * 0.35);
+      drawKnob(x, knobY, knobR, -Math.PI / 2 + index * 0.35);
     });
 
     // Speaker grill
-    const grillX = cabinetX + cabinetW * 0.6;
-    const grillY = cabinetY + cabinetH * 0.64;
-    const grillW = cabinetW * 0.32;
-    const grillH = cabinetH * 0.25;
-    const grillR = clamp(grillH * 0.28, 10, 18);
+    const grillX = cabinetX + cabinetW * 0.6,
+      grillY = cabinetY + cabinetH * 0.64,
+      grillW = cabinetW * 0.32,
+      grillH = cabinetH * 0.25,
+      grillR = clamp(grillH * 0.28, 10, 18);
     ctx.save();
     ctx.globalAlpha *= 0.65;
     ctx.fillStyle = 'rgba(15,23,42,0.33)';
@@ -412,8 +405,8 @@ export class PlayPage implements OnDestroy {
 
     ctx.globalAlpha *= 0.8;
     ctx.fillStyle = 'rgba(15,23,42,0.55)';
-    const dotR = clamp(grillH * 0.06, 1.4, 3);
-    const step = dotR * 3;
+    const dotR = clamp(grillH * 0.06, 1.4, 3),
+      step = dotR * 3;
     for (let y = grillY + dotR * 2; y <= grillY + grillH - dotR * 2; y += step) {
       for (let x = grillX + dotR * 2; x <= grillX + grillW - dotR * 2; x += step) {
         ctx.beginPath();
@@ -434,14 +427,14 @@ export class PlayPage implements OnDestroy {
     ctx.restore();
 
     // Antennas (metal)
-    const antennaWidth = clamp(cabinetH * 0.03, 3, 5);
-    const metalStroke = (x: number): CanvasGradient => {
-      const g = ctx.createLinearGradient(x - antennaWidth, 0, x + antennaWidth, 0);
-      g.addColorStop(0, 'rgba(226,232,240,0.82)');
-      g.addColorStop(0.5, 'rgba(148,163,184,0.95)');
-      g.addColorStop(1, 'rgba(248,250,252,0.82)');
-      return g;
-    };
+    const antennaWidth = clamp(cabinetH * 0.03, 3, 5),
+      metalStroke = (x: number): CanvasGradient => {
+        const g = ctx.createLinearGradient(x - antennaWidth, 0, x + antennaWidth, 0);
+        g.addColorStop(0, 'rgba(226,232,240,0.82)');
+        g.addColorStop(0.5, 'rgba(148,163,184,0.95)');
+        g.addColorStop(1, 'rgba(248,250,252,0.82)');
+        return g;
+      };
 
     ctx.save();
     ctx.globalAlpha *= 0.95;
@@ -455,15 +448,15 @@ export class PlayPage implements OnDestroy {
     ctx.lineTo(pitchRodX, rodTopY);
     ctx.stroke();
 
-    const ballR = antennaWidth * 1.6;
-    const ball = ctx.createRadialGradient(
-      pitchRodX - ballR * 0.35,
-      rodTopY - ballR * 0.35,
-      1,
-      pitchRodX,
-      rodTopY,
-      ballR * 1.8
-    );
+    const ballR = antennaWidth * 1.6,
+      ball = ctx.createRadialGradient(
+        pitchRodX - ballR * 0.35,
+        rodTopY - ballR * 0.35,
+        1,
+        pitchRodX,
+        rodTopY,
+        ballR * 1.8,
+      );
     ball.addColorStop(0, 'rgba(248,250,252,0.95)');
     ball.addColorStop(1, 'rgba(148,163,184,0.95)');
     ctx.fillStyle = ball;
@@ -475,9 +468,9 @@ export class PlayPage implements OnDestroy {
     ctx.stroke();
 
     // Volume loop (right)
-    const loopY = cabinetY - cabinetH * 0.08;
-    const loopRx = clamp(cabinetW * 0.06, 16, 28);
-    const loopRy = loopRx * 0.55;
+    const loopY = cabinetY - cabinetH * 0.08,
+      loopRx = clamp(cabinetW * 0.06, 16, 28),
+      loopRy = loopRx * 0.55;
     ctx.strokeStyle = metalStroke(volumeLoopX);
     ctx.lineWidth = antennaWidth;
     ctx.beginPath();
@@ -498,7 +491,7 @@ export class PlayPage implements OnDestroy {
       return null;
     }
 
-    if (!this.overlayCache || this.overlayCache.width !== width || this.overlayCache.height !== height) {
+    if (this.overlayCache?.width !== width || this.overlayCache.height !== height) {
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
@@ -516,8 +509,8 @@ export class PlayPage implements OnDestroy {
 
   private attachAspectListener(video: HTMLVideoElement): void {
     const updateAspect = () => {
-      const width = video.videoWidth;
-      const height = video.videoHeight;
+      const width = video.videoWidth,
+        height = video.videoHeight;
       if (width > 0 && height > 0) {
         this.cameraAspect.set(width / height);
       }

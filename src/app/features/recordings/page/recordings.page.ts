@@ -10,8 +10,8 @@ import { RecordingsStore } from '../state/recordings.store';
   styleUrl: './recordings.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'block'
-  }
+    class: 'block',
+  },
 })
 export class RecordingsPage {
   readonly store = inject(RecordingsStore);

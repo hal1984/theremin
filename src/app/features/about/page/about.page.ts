@@ -9,7 +9,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   styleUrl: './about.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'block'
-  }
+    class: 'block',
+  },
 })
 export class AboutPage {}

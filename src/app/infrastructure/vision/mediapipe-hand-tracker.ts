@@ -1,10 +1,14 @@
-import {
-  HAND_TRACKING_CONFIG,
+import type {
   HandTrackingConfig,
   HandTrackingPort,
-  HandTrackingStartOptions
+  HandTrackingStartOptions,
 } from '../../application/ports/hand-tracking.port';
-import { HandTrackingFrame, HandPose, Handedness } from '../../domain/theremin/models/hand-tracking.model';
+import { HAND_TRACKING_CONFIG } from '../../application/ports/hand-tracking.port';
+import type {
+  HandPose,
+  HandTrackingFrame,
+  Handedness,
+} from '../../domain/theremin/models/hand-tracking.model';
 import { inject } from '@angular/core';
 import type { HandLandmarker, HandLandmarkerResult } from '@mediapipe/tasks-vision';
 
@@ -57,7 +61,9 @@ export class MediaPipeHandTracker implements HandTrackingPort {
     }
 
     if (this.stream) {
-      this.stream.getTracks().forEach((track) => track.stop());
+      this.stream.getTracks().forEach((track) => {
+        track.stop();
+      });
       this.stream = null;
     }
 
@@ -77,17 +83,17 @@ export class MediaPipeHandTracker implements HandTrackingPort {
       return;
     }
 
-    const tasks = await this.loadTasksModule();
-    const vision = await tasks.FilesetResolver.forVisionTasks(this.config.wasmBasePath);
+    const tasks = await this.loadTasksModule(),
+      vision = await tasks.FilesetResolver.forVisionTasks(this.config.wasmBasePath);
     this.landmarker = await tasks.HandLandmarker.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: this.config.modelAssetPath
+        modelAssetPath: this.config.modelAssetPath,
       },
       runningMode: 'VIDEO',
       numHands: this.config.maxHands,
       minHandDetectionConfidence: this.config.minDetectionConfidence,
       minHandPresenceConfidence: this.config.minPresenceConfidence,
-      minTrackingConfidence: this.config.minTrackingConfidence
+      minTrackingConfidence: this.config.minTrackingConfidence,
     });
   }
 
@@ -105,9 +111,9 @@ export class MediaPipeHandTracker implements HandTrackingPort {
       video: {
         width: config.videoWidth,
         height: config.videoHeight,
-        facingMode: 'user'
+        facingMode: 'user',
       },
-      audio: false
+      audio: false,
     });
 
     this.stream = stream;
@@ -124,7 +130,7 @@ export class MediaPipeHandTracker implements HandTrackingPort {
     video.play();
   }
 
-  private loop = (now: number): void => {
+  private readonly loop = (now: number): void => {
     if (!this.running || !this.landmarker || !this.video) {
       return;
     }
@@ -143,8 +149,8 @@ export class MediaPipeHandTracker implements HandTrackingPort {
     this.lastFrameTime = now;
 
     try {
-      const result = this.landmarker.detectForVideo(this.video, now);
-      const frame = this.mapResult(result, now);
+      const result = this.landmarker.detectForVideo(this.video, now),
+        frame = this.mapResult(result, now);
       this.onFrame?.(frame);
     } catch (error) {
       this.running = false;
@@ -163,21 +169,19 @@ export class MediaPipeHandTracker implements HandTrackingPort {
     await new Promise<void>((resolve) => {
       let resolved = false;
       const done = () => {
-        if (resolved) {
-          return;
-        }
-        resolved = true;
-        video.removeEventListener('loadedmetadata', done);
-        video.removeEventListener('loadeddata', done);
-        resolve();
-      };
-
-      const timeoutId = window.setTimeout(done, 1500);
-
-      const finish = () => {
-        window.clearTimeout(timeoutId);
-        done();
-      };
+          if (resolved) {
+            return;
+          }
+          resolved = true;
+          video.removeEventListener('loadedmetadata', done);
+          video.removeEventListener('loadeddata', done);
+          resolve();
+        },
+        timeoutId = window.setTimeout(done, 1500),
+        finish = () => {
+          window.clearTimeout(timeoutId);
+          done();
+        };
 
       video.addEventListener('loadedmetadata', finish, { once: true });
       video.addEventListener('loadeddata', finish, { once: true });
@@ -186,32 +190,28 @@ export class MediaPipeHandTracker implements HandTrackingPort {
 
   private mapResult(result: HandLandmarkerResult, timestampMs: number): HandTrackingFrame {
     const hands: HandPose[] = result.landmarks.map((landmarks, index) => {
-      const handednessEntry = result.handedness?.[index]?.[0];
-      const label = handednessEntry?.categoryName ?? handednessEntry?.displayName;
-      const score = handednessEntry?.score ?? 0;
+      const handednessEntry = result.handedness?.[index]?.[0],
+        label = handednessEntry?.categoryName ?? handednessEntry?.displayName,
+        score = handednessEntry?.score ?? 0;
 
       return {
         handedness: resolveHandedness(label),
         score,
-        landmarks
+        landmarks,
       };
     });
 
     return {
       timestampMs,
-      hands
+      hands,
     };
   }
 }
 
 export class NoopHandTracker implements HandTrackingPort {
-  async start(): Promise<void> {
-    return;
-  }
+  async start(): Promise<void> {}
 
-  stop(): void {
-    return;
-  }
+  stop(): void {}
 
   isRunning(): boolean {
     return false;

@@ -3,14 +3,14 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 
 type VolumeCurve = 'linear' | 'expo';
 
-type SettingsState = {
+interface SettingsState {
   minHz: number;
   maxHz: number;
   smoothingMs: number;
   swapHands: boolean;
   quantize: boolean;
   volumeCurve: VolumeCurve;
-};
+}
 
 const initialState: SettingsState = {
   minHz: 40,
@@ -18,7 +18,7 @@ const initialState: SettingsState = {
   smoothingMs: 40,
   swapHands: false,
   quantize: true,
-  volumeCurve: 'expo'
+  volumeCurve: 'expo',
 };
 
 export const SettingsStore = signalStore(
@@ -26,7 +26,7 @@ export const SettingsStore = signalStore(
   withState(initialState),
   withComputed(({ swapHands, quantize }) => ({
     swapHandsLabelKey: computed(() => (swapHands() ? 'COMMON.YES' : 'COMMON.NO')),
-    quantizeLabelKey: computed(() => (quantize() ? 'COMMON.YES' : 'COMMON.NO'))
+    quantizeLabelKey: computed(() => (quantize() ? 'COMMON.YES' : 'COMMON.NO')),
   })),
   withMethods((store) => ({
     setRange(minHz: number, maxHz: number): void {
@@ -43,8 +43,8 @@ export const SettingsStore = signalStore(
     },
     setVolumeCurve(volumeCurve: VolumeCurve): void {
       patchState(store, { volumeCurve });
-    }
-  }))
+    },
+  })),
 );
 
 export type SettingsStore = InstanceType<typeof SettingsStore>;

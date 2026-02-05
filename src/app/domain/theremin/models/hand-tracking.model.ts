@@ -1,23 +1,23 @@
 export type Handedness = 'Left' | 'Right';
 
-export type NormalizedLandmark = {
+export interface NormalizedLandmark {
   x: number;
   y: number;
   z?: number;
-};
+}
 
-export type HandPose = {
+export interface HandPose {
   handedness: Handedness;
   score: number;
   landmarks: readonly NormalizedLandmark[];
-};
+}
 
-export type HandTrackingFrame = {
+export interface HandTrackingFrame {
   timestampMs: number;
   hands: readonly HandPose[];
-};
+}
 
-export type ThereminParams = {
+export interface ThereminParams {
   pitchHz: number;
   gain: number;
-};
+}

@@ -1,4 +1,5 @@
-import { mergeApplicationConfig, ApplicationConfig } from '@angular/core';
+import type { ApplicationConfig } from '@angular/core';
+import { mergeApplicationConfig } from '@angular/core';
 import { provideServerRendering, withRoutes } from '@angular/ssr';
 import { TranslateLoader } from '@ngx-translate/core';
 
@@ -9,8 +10,8 @@ import { ServerTranslateLoader } from './core/i18n/translate.loader.server';
 const serverConfig: ApplicationConfig = {
   providers: [
     provideServerRendering(withRoutes(serverRoutes)),
-    { provide: TranslateLoader, useClass: ServerTranslateLoader }
-  ]
+    { provide: TranslateLoader, useClass: ServerTranslateLoader },
+  ],
 };
 
 export const config = mergeApplicationConfig(appConfig, serverConfig);

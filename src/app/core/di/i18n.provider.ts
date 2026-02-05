@@ -1,17 +1,18 @@
-import { EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
+import type { EnvironmentProviders } from '@angular/core';
+import { makeEnvironmentProviders } from '@angular/core';
 import { provideHttpClient, withFetch } from '@angular/common/http';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { TranslateLoader, provideTranslateService } from '@ngx-translate/core';
 
 import { BrowserTranslateLoader } from '../i18n/translate.loader.browser';
 
-type I18nConfig = {
+interface I18nConfig {
   defaultLang: string;
   fallbackLang: string;
-};
+}
 
 const defaultConfig: I18nConfig = {
   defaultLang: 'es',
-  fallbackLang: 'en'
+  fallbackLang: 'en',
 };
 
 export const provideI18n = (overrides: Partial<I18nConfig> = {}): EnvironmentProviders => {
@@ -22,7 +23,7 @@ export const provideI18n = (overrides: Partial<I18nConfig> = {}): EnvironmentPro
     provideTranslateService({
       loader: { provide: TranslateLoader, useClass: BrowserTranslateLoader },
       // `defaultLanguage`/`useDefaultLang` are deprecated in ngx-translate v17.
-      fallbackLang: config.fallbackLang
-    })
+      fallbackLang: config.fallbackLang,
+    }),
   ]);
 };

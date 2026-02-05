@@ -1,23 +1,22 @@
-import { RecorderConfig, RecorderPort, RecordedClip } from '../../application/ports/recorder.port';
+import type {
+  RecordedClip,
+  RecorderConfig,
+  RecorderPort,
+} from '../../application/ports/recorder.port';
 
-type RecorderState = {
+interface RecorderState {
   recorder: MediaRecorder;
   chunks: Blob[];
   startedAt: number;
   mimeType: string;
-};
+}
 
 const resolveMimeType = (preferred?: string): string => {
   if (preferred && MediaRecorder.isTypeSupported(preferred)) {
     return preferred;
   }
 
-  const candidates = [
-    'audio/webm;codecs=opus',
-    'audio/webm',
-    'audio/ogg;codecs=opus',
-    'audio/ogg'
-  ];
+  const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/ogg'];
 
   return candidates.find((type) => MediaRecorder.isTypeSupported(type)) ?? '';
 };
@@ -32,13 +31,12 @@ export class MediaRecorderAdapter implements RecorderPort {
       return;
     }
 
-    const mimeType = resolveMimeType(this.config.mimeType);
-    const recorder = new MediaRecorder(stream, {
-      mimeType: mimeType || undefined,
-      audioBitsPerSecond: this.config.audioBitsPerSecond
-    });
-
-    const chunks: Blob[] = [];
+    const mimeType = resolveMimeType(this.config.mimeType),
+      recorder = new MediaRecorder(stream, {
+        mimeType: mimeType || undefined,
+        audioBitsPerSecond: this.config.audioBitsPerSecond,
+      }),
+      chunks: Blob[] = [];
     recorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
         chunks.push(event.data);
@@ -50,7 +48,7 @@ export class MediaRecorderAdapter implements RecorderPort {
       recorder,
       chunks,
       startedAt: performance.now(),
-      mimeType: mimeType || recorder.mimeType || 'audio/webm'
+      mimeType: mimeType || recorder.mimeType || 'audio/webm',
     };
   }
 
@@ -62,10 +60,10 @@ export class MediaRecorderAdapter implements RecorderPort {
     const { recorder, chunks, startedAt, mimeType } = this.state;
     this.state = null;
 
-    return await new Promise<RecordedClip>((resolve) => {
+    return new Promise<RecordedClip>((resolve) => {
       recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: mimeType });
-        const durationMs = Math.max(0, performance.now() - startedAt);
+        const blob = new Blob(chunks, { type: mimeType }),
+          durationMs = Math.max(0, performance.now() - startedAt);
         resolve({ blob, mimeType, durationMs });
       };
 
@@ -79,9 +77,7 @@ export class MediaRecorderAdapter implements RecorderPort {
 }
 
 export class NoopRecorder implements RecorderPort {
-  start(): void {
-    return;
-  }
+  start(): void {}
 
   async stop(): Promise<RecordedClip | null> {
     return null;

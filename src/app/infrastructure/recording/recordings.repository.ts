@@ -1,4 +1,4 @@
-export type StoredRecording = {
+export interface StoredRecording {
   id: string;
   title: string;
   durationSeconds: number;
@@ -6,49 +6,55 @@ export type StoredRecording = {
   createdAtMs: number;
   mimeType: string;
   blob: Blob;
-};
+}
 
-const DB_NAME = 'theremin-recordings';
-const STORE_NAME = 'recordings';
-const DB_VERSION = 1;
+const DB_NAME = 'theremin-recordings',
+  STORE_NAME = 'recordings',
+  DB_VERSION = 1,
+  openDatabase = async (): Promise<IDBDatabase> =>
+    new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-const openDatabase = (): Promise<IDBDatabase> =>
-  new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        }
+      };
 
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      }
-    };
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-
-const runTransaction = async <T>(
-  mode: IDBTransactionMode,
-  handler: (store: IDBObjectStore) => void,
-  finalize: (store: IDBObjectStore) => IDBRequest<T>
-): Promise<T> => {
-  const db = await openDatabase();
-  return await new Promise<T>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, mode);
-    const store = transaction.objectStore(STORE_NAME);
-    handler(store);
-    const request = finalize(store);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-};
+      request.onsuccess = () => {
+        resolve(request.result);
+      };
+      request.onerror = () => {
+        reject(request.error);
+      };
+    }),
+  runTransaction = async <T>(
+    mode: IDBTransactionMode,
+    handler: (store: IDBObjectStore) => void,
+    finalize: (store: IDBObjectStore) => IDBRequest<T>,
+  ): Promise<T> => {
+    const db = await openDatabase();
+    return new Promise<T>((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, mode),
+        store = transaction.objectStore(STORE_NAME);
+      handler(store);
+      const request = finalize(store);
+      request.onsuccess = () => {
+        resolve(request.result);
+      };
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  };
 
 export class RecordingsRepository {
   async getAll(): Promise<StoredRecording[]> {
-    return await runTransaction<StoredRecording[]>(
+    return runTransaction<StoredRecording[]>(
       'readonly',
       () => undefined,
-      (store) => store.getAll()
+      (store) => store.getAll(),
     );
   }
 
@@ -56,7 +62,7 @@ export class RecordingsRepository {
     await runTransaction(
       'readwrite',
       () => undefined,
-      (store) => store.put(recording)
+      (store) => store.put(recording),
     );
   }
 
@@ -64,7 +70,7 @@ export class RecordingsRepository {
     await runTransaction(
       'readwrite',
       () => undefined,
-      (store) => store.delete(id)
+      (store) => store.delete(id),
     );
   }
 
@@ -72,7 +78,7 @@ export class RecordingsRepository {
     await runTransaction(
       'readwrite',
       () => undefined,
-      (store) => store.clear()
+      (store) => store.clear(),
     );
   }
 }

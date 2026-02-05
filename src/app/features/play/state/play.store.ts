@@ -4,10 +4,13 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { AUDIO_SYNTH } from '../../../application/ports/audio-synth.port';
 import { RECORDER } from '../../../application/ports/recorder.port';
 import { HAND_TRACKING } from '../../../application/ports/hand-tracking.port';
-import { mapPoseToThereminParams, smoothParams } from '../../../domain/theremin/mapping/map-pose-to-params';
 import {
+  mapPoseToThereminParams,
+  smoothParams,
+} from '../../../domain/theremin/mapping/map-pose-to-params';
+import type {
   HandTrackingFrame,
-  ThereminParams
+  ThereminParams,
 } from '../../../domain/theremin/models/hand-tracking.model';
 import { SettingsStore } from '../../settings/state/settings.store';
 import { RecordingsStore } from '../../recordings/state/recordings.store';
@@ -16,29 +19,28 @@ import { TranslateService } from '@ngx-translate/core';
 type PlayStatus = 'idle' | 'active' | 'error';
 type CameraPermission = 'unknown' | 'granted' | 'denied';
 
-const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
-const hzToNote = (hz: number): string => {
-  if (!Number.isFinite(hz) || hz <= 0) {
-    return '--';
-  }
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const,
+  hzToNote = (hz: number): string => {
+    if (!Number.isFinite(hz) || hz <= 0) {
+      return '--';
+    }
 
-  const midi = Math.round(69 + 12 * Math.log2(hz / 440));
-  const note = NOTE_NAMES[((midi % 12) + 12) % 12];
-  const octave = Math.floor(midi / 12) - 1;
+    const midi = Math.round(69 + 12 * Math.log2(hz / 440)),
+      note = NOTE_NAMES[((midi % 12) + 12) % 12],
+      octave = Math.floor(midi / 12) - 1;
 
-  return `${note}${octave}`;
-};
+    return `${note}${octave}`;
+  },
+  gainToDb = (gain: number): number => {
+    if (!Number.isFinite(gain) || gain <= 0.0001) {
+      return -60;
+    }
 
-const gainToDb = (gain: number): number => {
-  if (!Number.isFinite(gain) || gain <= 0.0001) {
-    return -60;
-  }
+    const db = 20 * Math.log10(gain);
+    return Math.round(Math.max(db, -60));
+  };
 
-  const db = 20 * Math.log10(gain);
-  return Math.round(Math.max(db, -60));
-};
-
-type PlayState = {
+interface PlayState {
   status: PlayStatus;
   permission: CameraPermission;
   isRecording: boolean;
@@ -50,7 +52,7 @@ type PlayState = {
   gain: number;
   errorMessageKey: string | null;
   lastFrame: HandTrackingFrame | null;
-};
+}
 
 const initialState: PlayState = {
   status: 'idle',
@@ -63,168 +65,169 @@ const initialState: PlayState = {
   pitchHz: 440,
   gain: 0.2,
   errorMessageKey: null,
-  lastFrame: null
+  lastFrame: null,
 };
 
 export const PlayStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withComputed(({ status, permission, errorMessageKey, isRecording, pitchHz, gain, hasActivatedOnce, needsAudioUnlock }) => ({
-    isActive: computed(() => status() === 'active'),
-    canStart: computed(() => status() !== 'active' && permission() !== 'denied'),
-    hasError: computed(() => errorMessageKey() !== null),
-    shouldPulseStart: computed(() => !hasActivatedOnce() && status() === 'idle' && !needsAudioUnlock()),
-    pitchNoteLabel: computed(() => hzToNote(pitchHz())),
-    volumeDb: computed(() => gainToDb(gain())),
-    statusLabelKey: computed(() => {
-      if (status() === 'active') {
-        return 'PLAY.STATUS_ACTIVE';
-      }
+  withComputed(
+    ({
+      status,
+      permission,
+      errorMessageKey,
+      isRecording,
+      pitchHz,
+      gain,
+      hasActivatedOnce,
+      needsAudioUnlock,
+    }) => ({
+      isActive: computed(() => status() === 'active'),
+      canStart: computed(() => status() !== 'active' && permission() !== 'denied'),
+      hasError: computed(() => errorMessageKey() !== null),
+      shouldPulseStart: computed(
+        () => !hasActivatedOnce() && status() === 'idle' && !needsAudioUnlock(),
+      ),
+      pitchNoteLabel: computed(() => hzToNote(pitchHz())),
+      volumeDb: computed(() => gainToDb(gain())),
+      statusLabelKey: computed(() => {
+        if (status() === 'active') {
+          return 'PLAY.STATUS_ACTIVE';
+        }
 
-      if (status() === 'error') {
-        return 'PLAY.STATUS_ERROR';
-      }
+        if (status() === 'error') {
+          return 'PLAY.STATUS_ERROR';
+        }
 
-      return 'PLAY.STATUS_READY';
+        return 'PLAY.STATUS_READY';
+      }),
+      recordingLabelKey: computed(() =>
+        isRecording() ? 'PLAY.RECORD_ACTIVE' : 'PLAY.RECORD_IDLE',
+      ),
     }),
-    recordingLabelKey: computed(() =>
-      isRecording() ? 'PLAY.RECORD_ACTIVE' : 'PLAY.RECORD_IDLE'
-    )
-  })),
+  ),
   withMethods((store) => {
-    const audio = inject(AUDIO_SYNTH);
-    const recorder = inject(RECORDER);
-    const tracking = inject(HAND_TRACKING);
-    const settings = inject(SettingsStore);
-    const recordings = inject(RecordingsStore);
-    const translate = inject(TranslateService);
-    const isDocumentHidden = (): boolean =>
-      typeof document !== 'undefined' && document.visibilityState === 'hidden';
+    const audio = inject(AUDIO_SYNTH),
+      recorder = inject(RECORDER),
+      tracking = inject(HAND_TRACKING),
+      settings = inject(SettingsStore),
+      recordings = inject(RecordingsStore),
+      translate = inject(TranslateService),
+      isDocumentHidden = (): boolean =>
+        typeof document !== 'undefined' && document.visibilityState === 'hidden';
 
     let lastParams: ThereminParams = {
-      pitchHz: store.pitchHz(),
-      gain: store.gain()
-    };
-    let lastTimestamp = 0;
-    let lastUiTimestamp = 0;
+        pitchHz: store.pitchHz(),
+        gain: store.gain(),
+      },
+      lastTimestamp = 0,
+      lastUiTimestamp = 0;
 
     const startAudio = async (): Promise<void> => {
-      try {
-        await audio.start();
-        audio.setPitchHz(store.pitchHz());
-        audio.setGain(store.gain());
-        patchState(store, { status: 'active', errorMessageKey: null, needsAudioUnlock: false });
-      } catch (error) {
-        const isGestureError =
-          error instanceof DOMException && error.name === 'NotAllowedError';
-        if (isGestureError) {
+        try {
+          await audio.start();
+          audio.setPitchHz(store.pitchHz());
+          audio.setGain(store.gain());
+          patchState(store, { status: 'active', errorMessageKey: null, needsAudioUnlock: false });
+        } catch (error) {
+          const isGestureError = error instanceof DOMException && error.name === 'NotAllowedError';
+          if (isGestureError) {
+            patchState(store, {
+              status: 'idle',
+              needsAudioUnlock: true,
+              errorMessageKey: 'PLAY.ERROR_AUDIO_GESTURE',
+            });
+            return;
+          }
+
           patchState(store, {
-            status: 'idle',
-            needsAudioUnlock: true,
-            errorMessageKey: 'PLAY.ERROR_AUDIO_GESTURE'
+            status: 'error',
+            errorMessageKey: 'PLAY.ERROR_START_AUDIO',
           });
+        }
+      },
+      saveRecording = (clip: { blob: Blob; mimeType: string; durationMs: number }): void => {
+        const id = crypto.randomUUID(),
+          durationSeconds = Math.max(1, Math.round(clip.durationMs / 1000)),
+          createdAt = new Date(),
+          createdAtLabel = new Intl.DateTimeFormat(translate.currentLang || 'es', {
+            hour: '2-digit',
+            minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+          }).format(createdAt),
+          audioUrl = URL.createObjectURL(clip.blob);
+
+        recordings.add(
+          {
+            id,
+            title: translate.instant('RECORDINGS.SESSION_TITLE', { id: id.slice(0, 4) }),
+            durationSeconds,
+            createdAtLabel,
+            createdAtMs: createdAt.getTime(),
+            audioUrl,
+            mimeType: clip.mimeType,
+          },
+          clip.blob,
+        );
+      },
+      handleTrackingError = (error: unknown): void => {
+        const isPermissionError = error instanceof DOMException && error.name === 'NotAllowedError';
+        patchState(store, {
+          permission: isPermissionError ? 'denied' : 'unknown',
+          isTracking: false,
+          status: 'error',
+          errorMessageKey: isPermissionError
+            ? 'PLAY.ERROR_CAMERA_PERMISSION'
+            : 'PLAY.ERROR_HAND_TRACKING',
+        });
+        audio.stop();
+        tracking.stop();
+      },
+      handleFrame = (frame: HandTrackingFrame): void => {
+        const mappingConfig = {
+            minHz: settings.minHz(),
+            maxHz: settings.maxHz(),
+            volumeCurve: settings.volumeCurve(),
+            quantize: settings.quantize(),
+            swapHands: settings.swapHands(),
+            volumeInverted: true,
+          },
+          nextParams = mapPoseToThereminParams(frame, mappingConfig, lastParams),
+          deltaMs = lastTimestamp ? frame.timestampMs - lastTimestamp : 0,
+          smoothed = smoothParams(lastParams, nextParams, settings.smoothingMs(), deltaMs);
+
+        lastParams = smoothed;
+        lastTimestamp = frame.timestampMs;
+        audio.setPitchHz(smoothed.pitchHz);
+        audio.setGain(smoothed.gain);
+
+        if (isDocumentHidden()) {
+          lastUiTimestamp = frame.timestampMs;
           return;
         }
 
-        patchState(store, {
-          status: 'error',
-          errorMessageKey: 'PLAY.ERROR_START_AUDIO'
+        const uiIntervalMs = 1000 / 30;
+        if (!lastUiTimestamp || frame.timestampMs - lastUiTimestamp >= uiIntervalMs) {
+          lastUiTimestamp = frame.timestampMs;
+          patchState(store, {
+            lastFrame: frame,
+            pitchHz: smoothed.pitchHz,
+            gain: smoothed.gain,
+          });
+        }
+      },
+      startTracking = async (video: HTMLVideoElement): Promise<void> => {
+        await tracking.start({
+          video,
+          onFrame: handleFrame,
+          onError: handleTrackingError,
         });
-      }
-    };
 
-    const saveRecording = (clip: { blob: Blob; mimeType: string; durationMs: number }): void => {
-      const id = crypto.randomUUID();
-      const durationSeconds = Math.max(1, Math.round(clip.durationMs / 1000));
-      const createdAt = new Date();
-      const createdAtLabel = new Intl.DateTimeFormat(translate.currentLang || 'es', {
-        hour: '2-digit',
-        minute: '2-digit',
-        day: '2-digit',
-        month: '2-digit'
-      }).format(createdAt);
-      const audioUrl = URL.createObjectURL(clip.blob);
-
-      recordings.add(
-        {
-          id,
-          title: translate.instant('RECORDINGS.SESSION_TITLE', { id: id.slice(0, 4) }),
-          durationSeconds,
-          createdAtLabel,
-          createdAtMs: createdAt.getTime(),
-          audioUrl,
-          mimeType: clip.mimeType
-        },
-        clip.blob
-      );
-    };
-
-    const handleTrackingError = (error: unknown): void => {
-      const isPermissionError =
-        error instanceof DOMException && error.name === 'NotAllowedError';
-      patchState(store, {
-        permission: isPermissionError ? 'denied' : 'unknown',
-        isTracking: false,
-        status: 'error',
-        errorMessageKey: isPermissionError
-          ? 'PLAY.ERROR_CAMERA_PERMISSION'
-          : 'PLAY.ERROR_HAND_TRACKING'
-      });
-      audio.stop();
-      tracking.stop();
-    };
-
-    const handleFrame = (frame: HandTrackingFrame): void => {
-      const mappingConfig = {
-        minHz: settings.minHz(),
-        maxHz: settings.maxHz(),
-        volumeCurve: settings.volumeCurve(),
-        quantize: settings.quantize(),
-        swapHands: settings.swapHands(),
-        volumeInverted: true
+        if (tracking.isRunning()) {
+          patchState(store, { permission: 'granted', isTracking: true, isPreviewOn: true });
+        }
       };
-
-      const nextParams = mapPoseToThereminParams(frame, mappingConfig, lastParams);
-      const deltaMs = lastTimestamp ? frame.timestampMs - lastTimestamp : 0;
-      const smoothed = smoothParams(
-        lastParams,
-        nextParams,
-        settings.smoothingMs(),
-        deltaMs
-      );
-
-      lastParams = smoothed;
-      lastTimestamp = frame.timestampMs;
-      audio.setPitchHz(smoothed.pitchHz);
-      audio.setGain(smoothed.gain);
-
-      if (isDocumentHidden()) {
-        lastUiTimestamp = frame.timestampMs;
-        return;
-      }
-
-      const uiIntervalMs = 1000 / 30;
-      if (!lastUiTimestamp || frame.timestampMs - lastUiTimestamp >= uiIntervalMs) {
-        lastUiTimestamp = frame.timestampMs;
-        patchState(store, {
-          lastFrame: frame,
-          pitchHz: smoothed.pitchHz,
-          gain: smoothed.gain
-        });
-      }
-    };
-
-    const startTracking = async (video: HTMLVideoElement): Promise<void> => {
-      await tracking.start({
-        video,
-        onFrame: handleFrame,
-        onError: handleTrackingError
-      });
-
-      if (tracking.isRunning()) {
-        patchState(store, { permission: 'granted', isTracking: true, isPreviewOn: true });
-      }
-    };
 
     return {
       start(video: HTMLVideoElement): void {
@@ -248,7 +251,7 @@ export const PlayStore = signalStore(
         patchState(store, {
           isTracking: false,
           isPreviewOn: false,
-          lastFrame: null
+          lastFrame: null,
         });
       },
       setPermission(permission: CameraPermission): void {
@@ -276,7 +279,7 @@ export const PlayStore = signalStore(
         if (!stream) {
           patchState(store, {
             errorMessageKey: 'PLAY.ERROR_START_AUDIO',
-            status: 'error'
+            status: 'error',
           });
           return;
         }
@@ -298,7 +301,7 @@ export const PlayStore = signalStore(
         audio.stop();
         patchState(store, {
           status: 'idle',
-          isRecording: false
+          isRecording: false,
         });
       },
       setPitch(pitchHz: number): void {
@@ -312,14 +315,14 @@ export const PlayStore = signalStore(
       setError(errorKey: string | null): void {
         patchState(store, {
           errorMessageKey: errorKey,
-          status: errorKey ? 'error' : 'idle'
+          status: errorKey ? 'error' : 'idle',
         });
       },
       clearFrame(): void {
         patchState(store, { lastFrame: null });
-      }
+      },
     };
-  })
+  }),
 );
 
 export type PlayStore = InstanceType<typeof PlayStore>;
