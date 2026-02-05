@@ -21,8 +21,8 @@ export const provideI18n = (overrides: Partial<I18nConfig> = {}): EnvironmentPro
     provideHttpClient(withFetch()),
     provideTranslateService({
       loader: { provide: TranslateLoader, useClass: BrowserTranslateLoader },
-      defaultLanguage: config.defaultLang,
-      useDefaultLang: true
+      // `defaultLanguage`/`useDefaultLang` are deprecated in ngx-translate v17.
+      fallbackLang: config.fallbackLang
     })
   ]);
 };
