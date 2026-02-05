@@ -77,7 +77,9 @@ export class MediaRecorderAdapter implements RecorderPort {
 }
 
 export class NoopRecorder implements RecorderPort {
-  start(): void {}
+  start(): void {
+    void 0;
+  }
 
   async stop(): Promise<RecordedClip | null> {
     return null;

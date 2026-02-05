@@ -189,15 +189,25 @@ export class WebAudioSynth implements AudioSynthPort {
 }
 
 export class NoopAudioSynth implements AudioSynthPort {
-  async start(): Promise<void> {}
+  async start(): Promise<void> {
+    void 0;
+  }
 
-  stop(): void {}
+  stop(): void {
+    void 0;
+  }
 
-  setPitchHz(): void {}
+  setPitchHz(): void {
+    void 0;
+  }
 
-  setGain(): void {}
+  setGain(): void {
+    void 0;
+  }
 
-  setWaveform(): void {}
+  setWaveform(): void {
+    void 0;
+  }
 
   getOutputStream(): MediaStream | null {
     return null;

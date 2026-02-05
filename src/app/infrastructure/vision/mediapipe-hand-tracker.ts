@@ -209,9 +209,13 @@ export class MediaPipeHandTracker implements HandTrackingPort {
 }
 
 export class NoopHandTracker implements HandTrackingPort {
-  async start(): Promise<void> {}
+  async start(): Promise<void> {
+    void 0;
+  }
 
-  stop(): void {}
+  stop(): void {
+    void 0;
+  }
 
   isRunning(): boolean {
     return false;
