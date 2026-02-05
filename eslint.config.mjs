@@ -9,19 +9,19 @@ export default defineConfig([
     files: ["**/*.ts"],
     languageOptions: {
       parserOptions: {
-        // Keep linting fast and low-churn: no type-aware linting by default.
+        // "all" / "tsAll" include rules that require type information.
+        // Project service automatically finds the closest tsconfig for each file.
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
     extends: [
-      eslint.configs.recommended,
-      tseslint.configs.recommended,
-      tseslint.configs.stylistic,
-      angular.configs.tsRecommended,
+      eslint.configs.all,
+      tseslint.configs.all,
+      angular.configs.tsAll,
     ],
     processor: angular.processInlineTemplates,
     rules: {
-      // This codebase uses `type` aliases heavily; enforcing interface-only adds churn without benefit.
-      "@typescript-eslint/consistent-type-definitions": "off",
       "@angular-eslint/directive-selector": [
         "error",
         {
