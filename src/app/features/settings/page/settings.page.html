@@ -76,6 +76,7 @@
         [class.text-emerald-700]="store.swapHands()"
         [class.border-slate-300]="!store.swapHands()"
         [class.text-slate-700]="!store.swapHands()"
+        [attr.aria-pressed]="store.swapHands()"
         (click)="toggleSwapHands()"
       >
         {{ 'SETTINGS.SWAP_HANDS' | translate: { value: store.swapHandsLabelKey() | translate } }}
@@ -88,6 +89,7 @@
         [class.text-emerald-700]="store.quantize()"
         [class.border-slate-300]="!store.quantize()"
         [class.text-slate-700]="!store.quantize()"
+        [attr.aria-pressed]="store.quantize()"
         (click)="toggleQuantize()"
       >
         {{ 'SETTINGS.QUANTIZE' | translate: { value: store.quantizeLabelKey() | translate } }}

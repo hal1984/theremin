@@ -17,7 +17,7 @@ import { PlayStore } from '../state/play.store';
 import { SettingsStore } from '../../settings/state/settings.store';
 import { HandTrackingFrame } from '../../../domain/theremin/models/hand-tracking.model';
 
-const HAND_CONNECTIONS: Array<[number, number]> = [
+const HAND_CONNECTIONS: [number, number][] = [
   [0, 1],
   [1, 2],
   [2, 3],

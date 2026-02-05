@@ -13,7 +13,8 @@
     <button
       type="button"
       class="fixed inset-0 z-30 bg-slate-900/20 lg:hidden"
-      aria-hidden="true"
+      tabindex="-1"
+      [attr.aria-label]="'COMMON.MENU_CLOSE' | translate"
       (click)="closeNav()"
     ></button>
   }
@@ -97,6 +98,7 @@
           [class.text-slate-900]="currentLang() === 'es'"
           [class.border-slate-200]="currentLang() !== 'es'"
           [class.text-slate-600]="currentLang() !== 'es'"
+          [attr.aria-pressed]="currentLang() === 'es'"
           (click)="setLanguage('es')"
         >
           {{ 'COMMON.LANG_ES' | translate }}
@@ -108,6 +110,7 @@
           [class.text-slate-900]="currentLang() === 'en'"
           [class.border-slate-200]="currentLang() !== 'en'"
           [class.text-slate-600]="currentLang() !== 'en'"
+          [attr.aria-pressed]="currentLang() === 'en'"
           (click)="setLanguage('en')"
         >
           {{ 'COMMON.LANG_EN' | translate }}

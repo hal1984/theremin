@@ -47,7 +47,7 @@ export class RecordingsRepository {
   async getAll(): Promise<StoredRecording[]> {
     return await runTransaction<StoredRecording[]>(
       'readonly',
-      () => {},
+      () => undefined,
       (store) => store.getAll()
     );
   }
@@ -55,7 +55,7 @@ export class RecordingsRepository {
   async put(recording: StoredRecording): Promise<void> {
     await runTransaction(
       'readwrite',
-      () => {},
+      () => undefined,
       (store) => store.put(recording)
     );
   }
@@ -63,7 +63,7 @@ export class RecordingsRepository {
   async remove(id: string): Promise<void> {
     await runTransaction(
       'readwrite',
-      () => {},
+      () => undefined,
       (store) => store.delete(id)
     );
   }
@@ -71,7 +71,7 @@ export class RecordingsRepository {
   async clear(): Promise<void> {
     await runTransaction(
       'readwrite',
-      () => {},
+      () => undefined,
       (store) => store.clear()
     );
   }
