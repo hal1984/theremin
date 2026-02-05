@@ -9,13 +9,15 @@ export default defineConfig([
     files: ['**/*.ts'],
     languageOptions: {
       parserOptions: {
-        // "all" / "tsAll" include rules that require type information.
-        // Project service automatically finds the closest tsconfig for each file.
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
+
       },
     },
-    extends: [eslint.configs.all, tseslint.configs.all, angular.configs.tsAll],
+    extends: [
+      eslint.configs.recommended,
+      tseslint.configs.recommended,
+      tseslint.configs.stylistic,
+      angular.configs.tsRecommended,
+    ],
     processor: angular.processInlineTemplates,
     rules: {
       '@angular-eslint/directive-selector': [
