@@ -11,6 +11,7 @@ import { BrowserUuidService, NoopUuidService } from './browser-uuid.service';
 describe('platform services', () => {
   it('clock formats localized datetime', () => {
     const clock = new BrowserClockService();
+    expect(clock.now() instanceof Date).toBe(true);
     const value = clock.formatShortDateTime(new Date('2026-02-12T12:00:00.000Z'), 'es');
 
     expect(value.length).toBeGreaterThan(0);
@@ -33,6 +34,22 @@ describe('platform services', () => {
 
     expect(typeof browser.generate()).toBe('string');
     expect(typeof noop.generate()).toBe('string');
+  });
+
+  it('browser uuid falls back when randomUUID is unavailable', () => {
+    const originalCrypto = globalThis.crypto;
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: undefined,
+    });
+
+    const browser = new BrowserUuidService();
+    expect(typeof browser.generate()).toBe('string');
+
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: originalCrypto,
+    });
   });
 
   it('object-url noop works and browser delegates URL api', () => {

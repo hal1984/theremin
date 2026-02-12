@@ -148,4 +148,75 @@ describe('PlayPage (ng-mocks providers)', () => {
     expect(store.setGain).toHaveBeenCalledWith(0.7);
     expect(store.stopTracking).toHaveBeenCalledTimes(1);
   });
+
+  it('does not start preview when platform is server', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        MockProvider(PlayStore, store),
+        MockProvider(SettingsStore, {
+          minHz: () => 40,
+          maxHz: () => 600,
+        }),
+        { provide: PLATFORM_ID, useValue: 'server' },
+      ],
+    });
+    const serverComponent = TestBed.runInInjectionContext(() => new PlayPage());
+    const video = {
+      videoWidth: 200,
+      videoHeight: 100,
+      setAttribute: vi.fn(),
+      addEventListener: vi.fn(),
+    } as unknown as HTMLVideoElement;
+
+    serverComponent.onCameraReady(video);
+    serverComponent.start();
+
+    expect(store.startPreview).not.toHaveBeenCalled();
+    expect(store.start).not.toHaveBeenCalled();
+    expect(store.setError).toHaveBeenCalledWith('PLAY.ERROR_CAMERA_UNAVAILABLE');
+  });
+
+  it('drawOverlay respects document visibility', () => {
+    const drawSpy = vi.spyOn(ThereminOverlayRenderer.prototype, 'draw');
+    const frame = { timestampMs: 1, hands: [] };
+    const canvas = document.createElement('canvas');
+    const video = document.createElement('video');
+    const originalVisibility = Object.getOwnPropertyDescriptor(document, 'visibilityState');
+
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: 'hidden',
+    });
+    (
+      component as unknown as {
+        drawOverlay: (
+          frameArg: { timestampMs: number; hands: unknown[] },
+          canvasArg: HTMLCanvasElement,
+          videoArg: HTMLVideoElement,
+        ) => void;
+      }
+    ).drawOverlay(frame, canvas, video);
+    expect(drawSpy).not.toHaveBeenCalled();
+
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: 'visible',
+    });
+    (
+      component as unknown as {
+        drawOverlay: (
+          frameArg: { timestampMs: number; hands: unknown[] },
+          canvasArg: HTMLCanvasElement,
+          videoArg: HTMLVideoElement,
+        ) => void;
+      }
+    ).drawOverlay(frame, canvas, video);
+    expect(drawSpy).toHaveBeenCalled();
+
+    if (originalVisibility) {
+      Object.defineProperty(document, 'visibilityState', originalVisibility);
+    }
+    drawSpy.mockRestore();
+  });
 });

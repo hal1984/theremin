@@ -93,4 +93,24 @@ describe('App (class tests)', () => {
     setTimeoutSpy.mockRestore();
     vi.unstubAllGlobals();
   });
+
+  it('uses fallback language when currentLang is empty', () => {
+    const router = { url: '/', events: new Subject<NavigationEnd>().asObservable() } as Router;
+    const translate = {
+      use: vi.fn(),
+      onLangChange: new Subject<{ lang: string }>().asObservable(),
+      currentLang: '',
+    } as unknown as TranslateService;
+
+    const injector = Injector.create({
+      providers: [
+        { provide: Router, useValue: router },
+        { provide: TranslateService, useValue: translate },
+        { provide: PLATFORM_ID, useValue: 'server' },
+      ],
+    });
+
+    const app = runInInjectionContext(injector, () => new App());
+    expect(app.currentLang()).toBe('es');
+  });
 });

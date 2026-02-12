@@ -1,0 +1,30 @@
+<div class="order-1 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 md:order-2">
+  <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">
+    {{ 'PLAY.CAMERA_LABEL' | translate }}
+  </p>
+  <div
+    class="relative mt-3 w-full overflow-hidden rounded-xl border border-slate-200 bg-white"
+    [style.aspect-ratio]="aspectRatio()"
+  >
+    <video
+      #camera
+      class="absolute inset-0 z-0 h-full w-full object-cover"
+      autoplay
+      muted
+      playsinline
+      [attr.aria-label]="'PLAY.CAMERA_LABEL' | translate"
+    ></video>
+    <div class="pointer-events-none absolute inset-0 z-10">
+      <div class="absolute inset-y-0 right-[12%] w-px bg-emerald-200/70"></div>
+      <div class="absolute inset-y-0 left-[12%] w-px bg-sky-200/70"></div>
+      <div class="absolute inset-x-0 top-1/2 h-px bg-slate-200/70"></div>
+      <div
+        class="absolute bottom-4 left-4 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700"
+      >
+        {{ 'PLAY.CAMERA_OVERLAY' | translate }}
+      </div>
+    </div>
+    <canvas #overlay class="pointer-events-none absolute inset-0 z-20 h-full w-full bg-transparent">
+    </canvas>
+  </div>
+</div>

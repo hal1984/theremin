@@ -16,6 +16,8 @@ class FakeMediaRecorder {
 
 describe('MediaRecorderAdapter', () => {
   beforeEach(() => {
+    FakeMediaRecorder.isTypeSupported.mockReset();
+    FakeMediaRecorder.isTypeSupported.mockImplementation((type: string) => type.includes('webm'));
     vi.stubGlobal('MediaRecorder', FakeMediaRecorder as unknown as typeof MediaRecorder);
   });
 
@@ -45,6 +47,39 @@ describe('MediaRecorderAdapter', () => {
   it('returns null when stopping without active recorder', async () => {
     const adapter = new MediaRecorderAdapter({ mimeType: 'audio/ogg', audioBitsPerSecond: 128000 });
     await expect(adapter.stop()).resolves.toBeNull();
+  });
+
+  it('ignores second start when already recording', () => {
+    const adapter = new MediaRecorderAdapter({
+      mimeType: 'audio/webm',
+      audioBitsPerSecond: 128000,
+    });
+    adapter.start({} as MediaStream);
+    adapter.start({} as MediaStream);
+
+    const state = (adapter as unknown as { state: { recorder: FakeMediaRecorder } | null }).state;
+    expect(state?.recorder.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back mime type when preferred and candidates are unsupported', async () => {
+    FakeMediaRecorder.isTypeSupported.mockImplementation(() => false);
+    const adapter = new MediaRecorderAdapter({
+      mimeType: 'audio/not-supported',
+      audioBitsPerSecond: 128000,
+    });
+
+    adapter.start({} as MediaStream);
+    const state = (adapter as unknown as { state: { recorder: FakeMediaRecorder; chunks: Blob[] } })
+      .state;
+    if (state) {
+      state.recorder.mimeType = '';
+      state.recorder.ondataavailable?.({
+        data: new Blob([], { type: 'audio/not-supported' }),
+      } as BlobEvent);
+    }
+
+    const clip = await adapter.stop();
+    expect(clip?.mimeType).toBe('audio/webm');
   });
 
   it('noop recorder contract', async () => {

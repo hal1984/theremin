@@ -237,4 +237,80 @@ describe('PlayStore', () => {
     expect(store.isTracking()).toBe(false);
     expect(store.isPreviewOn()).toBe(false);
   });
+
+  it('startPreview triggers tracking and updates frame-driven state', async () => {
+    const store = TestBed.inject(PlayStore);
+    handTracking.start.mockImplementationOnce(
+      async (options?: {
+        onFrame?: (frame: {
+          timestampMs: number;
+          hands: {
+            handedness: 'Left' | 'Right';
+            score: number;
+            landmarks: { x: number; y: number; z: number }[];
+          }[];
+        }) => void;
+      }) => {
+        trackingRunning = true;
+        options?.onFrame?.({
+          timestampMs: 100,
+          hands: [
+            {
+              handedness: 'Right',
+              score: 0.9,
+              landmarks: Array.from({ length: 21 }, (_, i) => ({ x: i / 100, y: i / 120, z: 0 })),
+            },
+          ],
+        });
+      },
+    );
+
+    store.startPreview(document.createElement('video'));
+    await flush();
+
+    expect(store.isTracking()).toBe(true);
+    expect(store.isPreviewOn()).toBe(true);
+    expect(audio.setPitchHz).toHaveBeenCalled();
+    expect(audio.setGain).toHaveBeenCalled();
+  });
+
+  it('sets error state when recording toggle use-case returns error', async () => {
+    const store = TestBed.inject(PlayStore);
+    audio.getOutputStream.mockReturnValueOnce(null as unknown as MediaStream);
+
+    store.start(document.createElement('video'));
+    await flush();
+    store.toggleRecording();
+    await flush();
+
+    expect(store.status()).toBe('error');
+    expect(store.errorMessageKey()).toBeTruthy();
+  });
+
+  it('stop keeps idle state when no clip payload is returned', async () => {
+    const store = TestBed.inject(PlayStore);
+    recorder.stop.mockImplementationOnce(async () => null as never);
+
+    store.start(document.createElement('video'));
+    await flush();
+    store.stop();
+    await flush();
+
+    expect(store.status()).toBe('idle');
+    expect(store.isRecording()).toBe(false);
+  });
+
+  it('computes labels for edge pitch/gain and denied permission', () => {
+    const store = TestBed.inject(PlayStore);
+
+    store.setPitch(Number.NaN);
+    store.setGain(0);
+    store.setPermission('denied');
+    store.setError('PLAY.ERROR_HAND_TRACKING');
+
+    expect(store.pitchNoteLabel()).toBe('--');
+    expect(store.volumeDb()).toBe(-60);
+    expect(store.canStart()).toBe(false);
+    expect(store.statusLabelKey()).toBe('PLAY.STATUS_ERROR');
+  });
 });

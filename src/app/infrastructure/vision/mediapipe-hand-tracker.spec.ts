@@ -207,6 +207,142 @@ describe('MediaPipeHandTracker', () => {
     rafSpy.mockRestore();
   });
 
+  it('reuses running stream and reattaches to a different video', async () => {
+    const tracker = TestBed.runInInjectionContext(() => new MediaPipeHandTracker());
+    const attachSpy = vi.spyOn(
+      tracker as unknown as {
+        attachStreamToVideo: (video: HTMLVideoElement, stream: MediaStream) => void;
+      },
+      'attachStreamToVideo',
+    );
+    (
+      tracker as unknown as { running: boolean; stream: MediaStream; video: HTMLVideoElement }
+    ).running = true;
+    (
+      tracker as unknown as { running: boolean; stream: MediaStream; video: HTMLVideoElement }
+    ).stream = {} as MediaStream;
+    (
+      tracker as unknown as { running: boolean; stream: MediaStream; video: HTMLVideoElement }
+    ).video = document.createElement('video');
+    const nextVideo = document.createElement('video');
+
+    await tracker.start({
+      video: nextVideo,
+      onFrame: vi.fn(),
+      onError: vi.fn(),
+    });
+
+    expect(attachSpy).toHaveBeenCalledWith(nextVideo, expect.anything());
+  });
+
+  it('waitForVideoReady resolves when loadedmetadata fires', async () => {
+    const tracker = TestBed.runInInjectionContext(() => new MediaPipeHandTracker());
+    const waitForVideoReady = (
+      tracker as unknown as { waitForVideoReady: (video: HTMLVideoElement) => Promise<void> }
+    ).waitForVideoReady;
+    const video = document.createElement('video');
+    Object.defineProperty(video, 'readyState', { value: 0, configurable: true });
+    Object.defineProperty(video, 'videoWidth', { value: 0, configurable: true });
+    Object.defineProperty(video, 'videoHeight', { value: 0, configurable: true });
+
+    const promise = waitForVideoReady(video);
+    video.dispatchEvent(new Event('loadedmetadata'));
+    await expect(promise).resolves.toBeUndefined();
+  });
+
+  it('ensureLandmarker and loadTasksModule return from cache', async () => {
+    const tracker = TestBed.runInInjectionContext(() => new MediaPipeHandTracker());
+    (tracker as unknown as { landmarker: object }).landmarker = {};
+
+    await expect(
+      (
+        tracker as unknown as {
+          ensureLandmarker: () => Promise<void>;
+        }
+      ).ensureLandmarker(),
+    ).resolves.toBeUndefined();
+
+    const tasksModule = {} as typeof import('@mediapipe/tasks-vision');
+    (tracker as unknown as { tasksModule: typeof import('@mediapipe/tasks-vision') }).tasksModule =
+      tasksModule;
+    await expect(
+      (
+        tracker as unknown as {
+          loadTasksModule: () => Promise<typeof import('@mediapipe/tasks-vision')>;
+        }
+      ).loadTasksModule(),
+    ).resolves.toBe(tasksModule);
+  });
+
+  it('start success path calls ensure, attach, wait and loop', async () => {
+    const tracker = TestBed.runInInjectionContext(() => new MediaPipeHandTracker());
+    const ensureSpy = vi
+      .spyOn(tracker as unknown as { ensureLandmarker: () => Promise<void> }, 'ensureLandmarker')
+      .mockResolvedValue(undefined);
+    const attachSpy = vi
+      .spyOn(
+        tracker as unknown as {
+          attachCamera: (video: HTMLVideoElement, config: unknown) => Promise<void>;
+        },
+        'attachCamera',
+      )
+      .mockResolvedValue(undefined);
+    const waitSpy = vi
+      .spyOn(
+        tracker as unknown as { waitForVideoReady: (video: HTMLVideoElement) => Promise<void> },
+        'waitForVideoReady',
+      )
+      .mockResolvedValue(undefined);
+    const loopSpy = vi.spyOn(tracker as unknown as { loop: (now: number) => void }, 'loop');
+
+    await tracker.start({
+      video: document.createElement('video'),
+      onFrame: vi.fn(),
+      onError: vi.fn(),
+    });
+
+    expect(ensureSpy).toHaveBeenCalled();
+    expect(attachSpy).toHaveBeenCalled();
+    expect(waitSpy).toHaveBeenCalled();
+    expect(loopSpy).toHaveBeenCalled();
+  });
+
+  it('loop throttles when called too early for target fps', () => {
+    const tracker = TestBed.runInInjectionContext(() => new MediaPipeHandTracker());
+    const rafSpy = vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation(() => 2);
+    (
+      tracker as unknown as {
+        running: boolean;
+        video: HTMLVideoElement;
+        landmarker: { detectForVideo: () => void };
+        lastFrameTime: number;
+      }
+    ).running = true;
+    (
+      tracker as unknown as {
+        running: boolean;
+        video: HTMLVideoElement;
+        landmarker: { detectForVideo: () => void };
+        lastFrameTime: number;
+      }
+    ).video = { videoWidth: 640, videoHeight: 480 } as HTMLVideoElement;
+    const detectSpy = vi.fn();
+    (
+      tracker as unknown as {
+        running: boolean;
+        video: HTMLVideoElement;
+        landmarker: { detectForVideo: () => void };
+        lastFrameTime: number;
+      }
+    ).landmarker = { detectForVideo: detectSpy };
+    (tracker as unknown as { lastFrameTime: number }).lastFrameTime = 995;
+
+    (tracker as unknown as { loop: (now: number) => void }).loop(1000);
+    expect(rafSpy).toHaveBeenCalled();
+    expect(detectSpy).not.toHaveBeenCalled();
+    rafSpy.mockRestore();
+  });
+
   it('noop tracker matches contract', async () => {
     const tracker = new NoopHandTracker();
     await tracker.start();

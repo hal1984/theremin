@@ -93,4 +93,48 @@ describe('RecordingsRepository', () => {
     await repo.remove();
     await repo.clear();
   });
+
+  it('rejects when database open fails', async () => {
+    vi.stubGlobal('indexedDB', {
+      open: vi.fn(() => {
+        const request = { error: new Error('open failed') } as IDBOpenDBRequest;
+        setTimeout(() => {
+          request.onerror?.({} as Event);
+        }, 0);
+        return request;
+      }),
+    });
+
+    const repo = new RecordingsRepository();
+    await expect(repo.getAll()).rejects.toBeTruthy();
+  });
+
+  it('creates object store on upgrade when missing', async () => {
+    const createObjectStore = vi.fn();
+    vi.stubGlobal('indexedDB', {
+      open: vi.fn(() => {
+        const request = {} as IDBOpenDBRequest;
+        const store = {
+          getAll: () => createRequest([]),
+        } as unknown as IDBObjectStore;
+        const db = {
+          objectStoreNames: { contains: () => false },
+          createObjectStore,
+          transaction: () => ({ objectStore: () => store }),
+        } as unknown as IDBDatabase;
+
+        setTimeout(() => {
+          (request as { result: IDBDatabase }).result = db;
+          request.onupgradeneeded?.({} as IDBVersionChangeEvent);
+          request.onsuccess?.({} as Event);
+        }, 0);
+
+        return request;
+      }),
+    });
+
+    const repo = new RecordingsRepository();
+    await repo.getAll();
+    expect(createObjectStore).toHaveBeenCalledWith('recordings', { keyPath: 'id' });
+  });
 });
