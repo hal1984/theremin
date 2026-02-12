@@ -3,7 +3,7 @@ import { PLATFORM_ID, inject, makeEnvironmentProviders } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 import type { AudioSynthConfig, AudioSynthPort } from '../../application/ports/audio-synth.port';
-import { AUDIO_SYNTH, AUDIO_SYNTH_CONFIG } from '../../application/ports/audio-synth.port';
+import { AUDIO_SYNTH, AUDIO_SYNTH_CONFIG } from './tokens/audio-synth.token';
 import { NoopAudioSynth, WebAudioSynth } from '../../infrastructure/audio/web-audio-synth';
 
 const defaultConfig: AudioSynthConfig = {

@@ -47,5 +47,46 @@ export default defineConfig([
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
     rules: {},
   },
+  {
+    files: ['src/app/features/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['**/infrastructure/**'],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/app/application/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['@angular/*', '@ngrx/*', '@ngx-translate/*'],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/app/domain/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@angular/*',
+            '@ngrx/*',
+            '@ngx-translate/*',
+            '**/application/**',
+            '**/infrastructure/**',
+            '**/features/**',
+            '**/core/**',
+          ],
+        },
+      ],
+    },
+  },
   eslintConfigPrettier,
 ]);

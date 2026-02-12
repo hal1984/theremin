@@ -1,5 +1,3 @@
-import { InjectionToken } from '@angular/core';
-
 export type AudioWaveform = OscillatorType;
 
 export interface AudioSynthConfig {
@@ -10,8 +8,6 @@ export interface AudioSynthConfig {
   gainSmoothingMs: number;
 }
 
-export const AUDIO_SYNTH_CONFIG = new InjectionToken<AudioSynthConfig>('AUDIO_SYNTH_CONFIG');
-
 export interface AudioSynthPort {
   start: () => Promise<void>;
   stop: () => void;
@@ -20,5 +16,3 @@ export interface AudioSynthPort {
   setWaveform: (type: AudioWaveform) => void;
   getOutputStream: () => MediaStream | null;
 }
-
-export const AUDIO_SYNTH = new InjectionToken<AudioSynthPort>('AUDIO_SYNTH');

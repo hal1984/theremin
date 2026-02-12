@@ -1,6 +1,6 @@
 <section class="flex flex-col gap-6">
   <header class="space-y-2">
-    <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+    <p class="text-sm font-semibold uppercase tracking-wide text-slate-700">
       {{ 'PLAY.TAG' | translate }}
     </p>
     <h1 class="text-3xl font-semibold text-slate-900">
@@ -9,135 +9,40 @@
   </header>
 
   <div class="grid gap-4 md:grid-cols-2">
-    <div class="order-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:order-1">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-        {{ 'PLAY.STATUS_LABEL' | translate }}
-      </p>
-      <p class="mt-2 text-xl font-semibold text-slate-900" aria-live="polite">
-        {{ store.statusLabelKey() | translate }}
-        @if (!store.isActive()) {
-          <span class="ml-2 text-sm font-semibold text-slate-500">
-            {{ 'PLAY.STATUS_TAP_TO_START' | translate }}
-          </span>
-        }
-      </p>
-      @if (store.hasError()) {
-        <p class="mt-2 text-sm text-red-600" role="alert">
-          {{ store.errorMessageKey()! | translate }}
-        </p>
-      }
-      <p class="mt-3 text-sm text-slate-500">
-        {{
-          'PLAY.STATUS_VALUES' | translate: { note: store.pitchNoteLabel(), db: store.volumeDb() }
-        }}
-      </p>
-    </div>
+    <app-play-status
+      [statusLabelKey]="store.statusLabelKey()"
+      [isActive]="store.isActive()"
+      [hasError]="store.hasError()"
+      [errorMessageKey]="store.errorMessageKey()"
+      [pitchNoteLabel]="store.pitchNoteLabel()"
+      [volumeDb]="store.volumeDb()"
+    />
 
-    <div
-      class="order-1 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 md:order-2"
-    >
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-        {{ 'PLAY.CAMERA_LABEL' | translate }}
-      </p>
-      <div
-        class="relative mt-3 w-full overflow-hidden rounded-xl border border-slate-200 bg-white"
-        [style.aspect-ratio]="cameraAspect()"
-      >
-        <video
-          #camera
-          class="absolute inset-0 z-0 h-full w-full object-cover"
-          autoplay
-          muted
-          playsinline
-          [attr.aria-label]="'PLAY.CAMERA_LABEL' | translate"
-        ></video>
-        <div class="pointer-events-none absolute inset-0 z-10">
-          <div class="absolute inset-y-0 right-[12%] w-px bg-emerald-200/70"></div>
-          <div class="absolute inset-y-0 left-[12%] w-px bg-sky-200/70"></div>
-          <div class="absolute inset-x-0 top-1/2 h-px bg-slate-200/70"></div>
-          <div
-            class="absolute bottom-4 left-4 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500"
-          >
-            {{ 'PLAY.CAMERA_OVERLAY' | translate }}
-          </div>
-        </div>
-        <canvas
-          #overlay
-          class="pointer-events-none absolute inset-0 z-20 h-full w-full bg-transparent"
-        ></canvas>
-      </div>
-    </div>
+    <app-play-camera
+      [aspectRatio]="cameraAspect()"
+      (cameraReady)="onCameraReady($event)"
+      (overlayReady)="onOverlayReady($event)"
+    />
   </div>
 
-  <div class="rounded-2xl border border-slate-200 bg-white p-4">
-    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-      {{ 'PLAY.ACCESSIBLE_LABEL' | translate }}
-    </p>
-    <p class="mt-2 text-sm text-slate-600">
-      {{ 'PLAY.ACCESSIBLE_DESCRIPTION' | translate }}
-    </p>
-    <form
-      class="mt-4 grid gap-4 md:grid-cols-2"
-      [attr.aria-label]="'PLAY.ACCESSIBLE_FORM' | translate"
-    >
-      <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-        {{ 'PLAY.PITCH_LABEL' | translate }}
-        <input
-          type="range"
-          class="h-2 w-full cursor-pointer accent-slate-900"
-          [formField]="controls.pitch"
-          step="1"
-          [attr.aria-label]="'PLAY.PITCH_ARIA' | translate"
-        />
-        <span class="text-xs font-semibold text-slate-500">
-          {{ store.pitchNoteLabel() }} · {{ controls.pitch().value().toPrecision(3) }}
-          {{ 'COMMON.HZ' | translate }}
-        </span>
-      </label>
-      <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-        {{ 'PLAY.GAIN_LABEL' | translate }}
-        <input
-          type="range"
-          class="h-2 w-full cursor-pointer accent-slate-900"
-          [formField]="controls.gain"
-          step="0.01"
-          [attr.aria-label]="'PLAY.GAIN_ARIA' | translate"
-        />
-        <span class="text-xs font-semibold text-slate-500"> {{ store.volumeDb() }} dB </span>
-      </label>
-    </form>
-  </div>
+  <app-play-manual-controls
+    [pitchValue]="store.pitchHz()"
+    [pitchMin]="settings.minHz()"
+    [pitchMax]="settings.maxHz()"
+    [gainValue]="store.gain()"
+    [pitchNoteLabel]="store.pitchNoteLabel()"
+    [volumeDb]="store.volumeDb()"
+    (pitchChange)="setPitch($event)"
+    (gainChange)="setGain($event)"
+  />
 
-  <div class="fixed bottom-6 right-6 z-30 flex flex-col gap-3">
-    <button
-      type="button"
-      class="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-300"
-      [class.animate-pulse]="store.shouldPulseStart()"
-      [class.ring-2]="store.shouldPulseStart()"
-      [class.ring-slate-900/40]="store.shouldPulseStart()"
-      [class.ring-offset-2]="store.shouldPulseStart()"
-      [class.ring-rose-400/80]="store.shouldPulseStart()"
-      [class.joya-pulse]="store.shouldPulseStart()"
-      [disabled]="!store.canStart()"
-      (click)="start()"
-    >
-      {{ 'PLAY.ACTION_START' | translate }}
-    </button>
-    <button
-      type="button"
-      class="rounded-full border border-slate-300 bg-slate-200/90 px-5 py-3 text-sm font-semibold text-slate-600 shadow-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
-      [disabled]="!store.isActive()"
-      (click)="stop()"
-    >
-      {{ 'PLAY.ACTION_STOP' | translate }}
-    </button>
-    <button
-      type="button"
-      class="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 shadow-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
-      [disabled]="!store.isActive()"
-      (click)="toggleRecording()"
-    >
-      {{ store.recordingLabelKey() | translate }}
-    </button>
-  </div>
+  <app-play-actions
+    [canStart]="store.canStart()"
+    [isActive]="store.isActive()"
+    [shouldPulseStart]="store.shouldPulseStart()"
+    [recordingLabelKey]="store.recordingLabelKey()"
+    (startPressed)="start()"
+    (stopPressed)="stop()"
+    (recordPressed)="toggleRecording()"
+  />
 </section>

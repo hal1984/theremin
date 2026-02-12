@@ -1,6 +1,6 @@
 <section class="flex flex-col gap-6">
   <header class="space-y-2">
-    <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+    <p class="text-sm font-semibold uppercase tracking-wide text-slate-700">
       {{ 'RECORDINGS.TAG' | translate }}
     </p>
     <h1 class="text-3xl font-semibold text-slate-900">
@@ -13,7 +13,7 @@
 
   @if (store.isEmpty()) {
     <div
-      class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500"
+      class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-700"
     >
       {{ 'RECORDINGS.EMPTY' | translate }}
     </div>
@@ -33,7 +33,7 @@
           <div class="flex items-center justify-between">
             <div>
               <h2 class="text-base font-semibold text-slate-900">{{ item.title }}</h2>
-              <p class="text-sm text-slate-500">
+              <p class="text-sm text-slate-700">
                 {{
                   'RECORDINGS.ITEM_META'
                     | translate: { seconds: item.durationSeconds, date: item.createdAtLabel }

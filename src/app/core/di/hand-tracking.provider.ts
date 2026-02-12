@@ -6,7 +6,7 @@ import type {
   HandTrackingConfig,
   HandTrackingPort,
 } from '../../application/ports/hand-tracking.port';
-import { HAND_TRACKING, HAND_TRACKING_CONFIG } from '../../application/ports/hand-tracking.port';
+import { HAND_TRACKING, HAND_TRACKING_CONFIG } from './tokens/hand-tracking.token';
 import {
   MediaPipeHandTracker,
   NoopHandTracker,

@@ -12,7 +12,11 @@
     "lint:fix": "ng lint --fix",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:unit": "ng test --watch=false",
+    "test:e2e": "playwright test",
+    "test:axe": "playwright test --grep @axe",
+    "check": "npm run lint && npm run test:unit && npm run build"
   },
   "prettier": {
     "printWidth": 100,
@@ -50,6 +54,8 @@
     "@angular/build": "^21.1.4",
     "@angular/cli": "^21.1.4",
     "@angular/compiler-cli": "^21.1.4",
+    "@axe-core/playwright": "^4.11.1",
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.3",

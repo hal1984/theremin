@@ -1,12 +1,7 @@
-export interface StoredRecording {
-  id: string;
-  title: string;
-  durationSeconds: number;
-  createdAtLabel: string;
-  createdAtMs: number;
-  mimeType: string;
-  blob: Blob;
-}
+import type {
+  RecordingsRepositoryPort,
+  StoredRecording,
+} from '../../application/ports/recordings-repository.port';
 
 const DB_NAME = 'theremin-recordings',
   STORE_NAME = 'recordings',
@@ -49,7 +44,7 @@ const DB_NAME = 'theremin-recordings',
     });
   };
 
-export class RecordingsRepository {
+export class RecordingsRepository implements RecordingsRepositoryPort {
   async getAll(): Promise<StoredRecording[]> {
     return runTransaction<StoredRecording[]>(
       'readonly',
@@ -80,5 +75,23 @@ export class RecordingsRepository {
       () => undefined,
       (store) => store.clear(),
     );
+  }
+}
+
+export class NoopRecordingsRepository implements RecordingsRepositoryPort {
+  async getAll(): Promise<StoredRecording[]> {
+    return [];
+  }
+
+  async put(): Promise<void> {
+    void 0;
+  }
+
+  async remove(): Promise<void> {
+    void 0;
+  }
+
+  async clear(): Promise<void> {
+    void 0;
   }
 }

@@ -3,7 +3,7 @@ import type {
   HandTrackingPort,
   HandTrackingStartOptions,
 } from '../../application/ports/hand-tracking.port';
-import { HAND_TRACKING_CONFIG } from '../../application/ports/hand-tracking.port';
+import { HAND_TRACKING_CONFIG } from '../../core/di/tokens/hand-tracking.token';
 import type {
   HandPose,
   HandTrackingFrame,

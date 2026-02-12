@@ -1,20 +1,21 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { TranslateService } from '@ngx-translate/core';
 
-import { AUDIO_SYNTH } from '../../../application/ports/audio-synth.port';
-import { RECORDER } from '../../../application/ports/recorder.port';
-import { HAND_TRACKING } from '../../../application/ports/hand-tracking.port';
-import {
-  mapPoseToThereminParams,
-  smoothParams,
-} from '../../../domain/theremin/mapping/map-pose-to-params';
+import { startPlaySessionUseCase } from '../../../application/use-cases/play/start-play-session.use-case';
+import { stopPlaySessionUseCase } from '../../../application/use-cases/play/stop-play-session.use-case';
+import { processTrackingFrameUseCase } from '../../../application/use-cases/play/process-tracking-frame.use-case';
+import { toggleRecordingUseCase } from '../../../application/use-cases/play/toggle-recording.use-case';
 import type {
   HandTrackingFrame,
   ThereminParams,
 } from '../../../domain/theremin/models/hand-tracking.model';
+import { HAND_TRACKING } from '../../../core/di/tokens/hand-tracking.token';
+import { AUDIO_SYNTH } from '../../../core/di/tokens/audio-synth.token';
+import { RECORDER } from '../../../core/di/tokens/recorder.token';
+import { CLOCK, OBJECT_URL, UUID } from '../../../core/di/tokens/platform.token';
 import { SettingsStore } from '../../settings/state/settings.store';
 import { RecordingsStore } from '../../recordings/state/recordings.store';
-import { TranslateService } from '@ngx-translate/core';
 
 type PlayStatus = 'idle' | 'active' | 'error';
 type CameraPermission = 'unknown' | 'granted' | 'denied';
@@ -113,8 +114,13 @@ export const PlayStore = signalStore(
       settings = inject(SettingsStore),
       recordings = inject(RecordingsStore),
       translate = inject(TranslateService),
+      clock = inject(CLOCK),
+      uuid = inject(UUID),
+      objectUrl = inject(OBJECT_URL),
       isDocumentHidden = (): boolean =>
-        typeof document !== 'undefined' && document.visibilityState === 'hidden';
+        typeof document !== 'undefined' && document.visibilityState === 'hidden',
+      recordingTitleBuilder = ({ id }: { id: string }): string =>
+        translate.instant('RECORDINGS.SESSION_TITLE', { id: id.slice(0, 4) });
 
     let lastParams: ThereminParams = {
         pitchHz: store.pitchHz(),
@@ -123,55 +129,7 @@ export const PlayStore = signalStore(
       lastTimestamp = 0,
       lastUiTimestamp = 0;
 
-    const startAudio = async (): Promise<void> => {
-        try {
-          await audio.start();
-          audio.setPitchHz(store.pitchHz());
-          audio.setGain(store.gain());
-          patchState(store, { status: 'active', errorMessageKey: null, needsAudioUnlock: false });
-        } catch (error) {
-          const isGestureError = error instanceof DOMException && error.name === 'NotAllowedError';
-          if (isGestureError) {
-            patchState(store, {
-              status: 'idle',
-              needsAudioUnlock: true,
-              errorMessageKey: 'PLAY.ERROR_AUDIO_GESTURE',
-            });
-            return;
-          }
-
-          patchState(store, {
-            status: 'error',
-            errorMessageKey: 'PLAY.ERROR_START_AUDIO',
-          });
-        }
-      },
-      saveRecording = (clip: { blob: Blob; mimeType: string; durationMs: number }): void => {
-        const id = crypto.randomUUID(),
-          durationSeconds = Math.max(1, Math.round(clip.durationMs / 1000)),
-          createdAt = new Date(),
-          createdAtLabel = new Intl.DateTimeFormat(translate.currentLang || 'es', {
-            hour: '2-digit',
-            minute: '2-digit',
-            day: '2-digit',
-            month: '2-digit',
-          }).format(createdAt),
-          audioUrl = URL.createObjectURL(clip.blob);
-
-        recordings.add(
-          {
-            id,
-            title: translate.instant('RECORDINGS.SESSION_TITLE', { id: id.slice(0, 4) }),
-            durationSeconds,
-            createdAtLabel,
-            createdAtMs: createdAt.getTime(),
-            audioUrl,
-            mimeType: clip.mimeType,
-          },
-          clip.blob,
-        );
-      },
-      handleTrackingError = (error: unknown): void => {
+    const handleTrackingError = (error: unknown): void => {
         const isPermissionError = error instanceof DOMException && error.name === 'NotAllowedError';
         patchState(store, {
           permission: isPermissionError ? 'denied' : 'unknown',
@@ -185,7 +143,9 @@ export const PlayStore = signalStore(
         tracking.stop();
       },
       handleFrame = (frame: HandTrackingFrame): void => {
-        const mappingConfig = {
+        const result = processTrackingFrameUseCase({
+          frame,
+          mappingConfig: {
             minHz: settings.minHz(),
             maxHz: settings.maxHz(),
             volumeCurve: settings.volumeCurve(),
@@ -193,27 +153,26 @@ export const PlayStore = signalStore(
             swapHands: settings.swapHands(),
             volumeInverted: true,
           },
-          nextParams = mapPoseToThereminParams(frame, mappingConfig, lastParams),
-          deltaMs = lastTimestamp ? frame.timestampMs - lastTimestamp : 0,
-          smoothed = smoothParams(lastParams, nextParams, settings.smoothingMs(), deltaMs);
+          previousParams: lastParams,
+          previousTimestampMs: lastTimestamp,
+          previousUiTimestampMs: lastUiTimestamp,
+          smoothingMs: settings.smoothingMs(),
+          isDocumentHidden: isDocumentHidden(),
+          uiFps: 30,
+        });
 
-        lastParams = smoothed;
-        lastTimestamp = frame.timestampMs;
-        audio.setPitchHz(smoothed.pitchHz);
-        audio.setGain(smoothed.gain);
+        lastParams = result.params;
+        lastTimestamp = result.timestampMs;
+        lastUiTimestamp = result.uiTimestampMs;
 
-        if (isDocumentHidden()) {
-          lastUiTimestamp = frame.timestampMs;
-          return;
-        }
+        audio.setPitchHz(result.params.pitchHz);
+        audio.setGain(result.params.gain);
 
-        const uiIntervalMs = 1000 / 30;
-        if (!lastUiTimestamp || frame.timestampMs - lastUiTimestamp >= uiIntervalMs) {
-          lastUiTimestamp = frame.timestampMs;
+        if (result.shouldUpdateUi) {
           patchState(store, {
             lastFrame: frame,
-            pitchHz: smoothed.pitchHz,
-            gain: smoothed.gain,
+            pitchHz: result.params.pitchHz,
+            gain: result.params.gain,
           });
         }
       },
@@ -233,8 +192,15 @@ export const PlayStore = signalStore(
       start(video: HTMLVideoElement): void {
         void (async () => {
           patchState(store, { hasActivatedOnce: true });
-          await startAudio();
-          if (store.status() === 'error') {
+
+          const audioResult = await startPlaySessionUseCase(audio, store.pitchHz(), store.gain());
+          patchState(store, {
+            status: audioResult.status,
+            errorMessageKey: audioResult.errorMessageKey,
+            needsAudioUnlock: audioResult.needsAudioUnlock,
+          });
+
+          if (audioResult.status === 'error') {
             return;
           }
 
@@ -262,47 +228,60 @@ export const PlayStore = signalStore(
           return;
         }
 
-        if (store.isRecording()) {
-          void (async () => {
-            const clip = await recorder.stop();
-            patchState(store, { isRecording: false });
-            if (!clip) {
-              return;
-            }
-
-            saveRecording(clip);
-          })();
-          return;
-        }
-
-        const stream = audio.getOutputStream();
-        if (!stream) {
-          patchState(store, {
-            errorMessageKey: 'PLAY.ERROR_START_AUDIO',
-            status: 'error',
+        void (async () => {
+          const result = await toggleRecordingUseCase({
+            isRecording: store.isRecording(),
+            audio,
+            recorder,
+            locale: translate.currentLang || 'es',
+            titleBuilder: recordingTitleBuilder,
+            uuid,
+            clock,
+            objectUrl,
           });
-          return;
-        }
 
-        recorder.start(stream);
-        patchState(store, { isRecording: true });
+          if (result.type === 'started') {
+            patchState(store, { isRecording: true });
+            return;
+          }
+
+          if (result.type === 'error') {
+            patchState(store, {
+              errorMessageKey: result.errorMessageKey,
+              status: 'error',
+            });
+            return;
+          }
+
+          patchState(store, { isRecording: false });
+
+          if (result.type === 'stopped') {
+            recordings.add(result.payload.item, result.payload.blob);
+          }
+        })();
       },
       stop(): void {
-        if (store.isRecording()) {
-          void (async () => {
-            const clip = await recorder.stop();
-            patchState(store, { isRecording: false });
-            if (clip) {
-              saveRecording(clip);
-            }
-          })();
-        }
+        void (async () => {
+          const result = await stopPlaySessionUseCase({
+            audio,
+            recorder,
+            isRecording: store.isRecording(),
+            locale: translate.currentLang || 'es',
+            titleBuilder: recordingTitleBuilder,
+            uuid,
+            clock,
+            objectUrl,
+          });
 
-        audio.stop();
-        patchState(store, {
-          status: 'idle',
-          isRecording: false,
-        });
+          patchState(store, {
+            status: 'idle',
+            isRecording: false,
+          });
+
+          if (result.payload) {
+            recordings.add(result.payload.item, result.payload.blob);
+          }
+        })();
       },
       setPitch(pitchHz: number): void {
         audio.setPitchHz(pitchHz);

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { CONFIRMATION } from '../../../core/di/tokens/platform.token';
 import { RecordingsStore } from '../state/recordings.store';
 
 @Component({
@@ -16,6 +17,7 @@ import { RecordingsStore } from '../state/recordings.store';
 export class RecordingsPage {
   readonly store = inject(RecordingsStore);
   private readonly translate = inject(TranslateService);
+  private readonly confirmation = inject(CONFIRMATION);
 
   constructor() {
     void this.store.load();
@@ -26,7 +28,9 @@ export class RecordingsPage {
   }
 
   remove(id: string): void {
-    const confirmed = window.confirm(this.translate.instant('RECORDINGS.CONFIRM_DELETE'));
+    const confirmed = this.confirmation.confirm(
+      this.translate.instant('RECORDINGS.CONFIRM_DELETE'),
+    );
     if (!confirmed) {
       return;
     }
@@ -34,7 +38,7 @@ export class RecordingsPage {
   }
 
   clear(): void {
-    const confirmed = window.confirm(this.translate.instant('RECORDINGS.CONFIRM_CLEAR'));
+    const confirmed = this.confirmation.confirm(this.translate.instant('RECORDINGS.CONFIRM_CLEAR'));
     if (!confirmed) {
       return;
     }

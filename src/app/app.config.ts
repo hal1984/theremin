@@ -9,6 +9,8 @@ import { provideAudioSynth } from './core/di/audio-synth.provider';
 import { provideI18n } from './core/di/i18n.provider';
 import { provideHandLandmarker } from './core/di/hand-tracking.provider';
 import { provideRecorder } from './core/di/recorder.provider';
+import { providePlatformPorts } from './core/di/platform.provider';
+import { provideRecordingsRepository } from './core/di/recordings-repository.provider';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,6 +21,8 @@ export const appConfig: ApplicationConfig = {
     provideAudioSynth(),
     provideHandLandmarker(),
     provideRecorder(),
+    providePlatformPorts(),
+    provideRecordingsRepository(),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
     }),

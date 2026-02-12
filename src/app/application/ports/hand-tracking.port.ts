@@ -1,4 +1,3 @@
-import { InjectionToken } from '@angular/core';
 import type { HandTrackingFrame } from '../../domain/theremin/models/hand-tracking.model';
 
 export interface HandTrackingConfig {
@@ -24,6 +23,3 @@ export interface HandTrackingPort {
   stop: () => void;
   isRunning: () => boolean;
 }
-
-export const HAND_TRACKING_CONFIG = new InjectionToken<HandTrackingConfig>('HAND_TRACKING_CONFIG');
-export const HAND_TRACKING = new InjectionToken<HandTrackingPort>('HAND_TRACKING');

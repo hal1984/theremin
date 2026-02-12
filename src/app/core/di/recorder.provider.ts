@@ -3,7 +3,7 @@ import { PLATFORM_ID, inject, makeEnvironmentProviders } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 import type { RecorderConfig, RecorderPort } from '../../application/ports/recorder.port';
-import { RECORDER, RECORDER_CONFIG } from '../../application/ports/recorder.port';
+import { RECORDER, RECORDER_CONFIG } from './tokens/recorder.token';
 import { MediaRecorderAdapter, NoopRecorder } from '../../infrastructure/recording/media-recorder';
 
 const defaultConfig: RecorderConfig = {
