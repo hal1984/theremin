@@ -501,7 +501,11 @@ export class PlayPage implements OnDestroy {
       }
 
       this.drawThereminOverlay(ctx, width, height);
-      this.overlayCache = { canvas, width, height };
+      this.overlayCache = {
+        canvas,
+        width,
+        height,
+      };
     }
 
     return this.overlayCache.canvas;

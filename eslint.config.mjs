@@ -3,14 +3,14 @@ import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import angular from 'angular-eslint';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import eslintPluginPrettier from 'eslint-plugin-prettier';
 
 export default defineConfig([
   {
     files: ['**/*.ts'],
     languageOptions: {
-      parserOptions: {
-
-      },
+      parserOptions: {},
     },
     extends: [
       eslint.configs.recommended,
@@ -18,6 +18,9 @@ export default defineConfig([
       tseslint.configs.stylistic,
       angular.configs.tsRecommended,
     ],
+    plugins: {
+      prettier: eslintPluginPrettier,
+    },
     processor: angular.processInlineTemplates,
     rules: {
       '@angular-eslint/directive-selector': [
@@ -36,6 +39,7 @@ export default defineConfig([
           style: 'kebab-case',
         },
       ],
+      'prettier/prettier': 'error',
     },
   },
   {
@@ -43,4 +47,5 @@ export default defineConfig([
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
     rules: {},
   },
+  eslintConfigPrettier,
 ]);
