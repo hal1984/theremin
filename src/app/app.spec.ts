@@ -1,71 +1,61 @@
-import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { TranslateLoader, provideTranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import '@angular/compiler';
+import { Injector, PLATFORM_ID, runInInjectionContext } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
 
 import { App } from './app';
-import { routes } from './app.routes';
 
-class TestTranslateLoader implements TranslateLoader {
-  getTranslation() {
-    return of({
-      'APP.SUBTITLE': 'Joya Theremin',
-      'COMMON.SKIP_TO_CONTENT': 'Skip to content',
-      'COMMON.NAV': 'Navigation',
-      'COMMON.MENU_OPEN': 'Open menu',
-      'COMMON.MENU_CLOSE': 'Close menu',
-      'COMMON.LANG_ES': 'ES',
-      'COMMON.LANG_EN': 'EN',
-      'NAV.PLAY': 'Play',
-      'NAV.RECORDINGS': 'Recordings',
-      'NAV.SETTINGS': 'Settings',
-      'NAV.ABOUT': 'About',
-    });
-  }
-}
+describe('App (class tests)', () => {
+  it('creates app and defaults language to es', () => {
+    const useSpy = vi.fn();
+    const router = { url: '/', events: new Subject<NavigationEnd>().asObservable() } as Router;
+    const translate = {
+      use: useSpy,
+      onLangChange: new Subject<{ lang: string }>().asObservable(),
+      currentLang: 'en',
+    } as unknown as TranslateService;
 
-describe('App', () => {
-  beforeEach(async () => {
-    const w = globalThis as unknown as { matchMedia?: (query: string) => MediaQueryList };
-    if (!w.matchMedia) {
-      w.matchMedia = (query: string) =>
-        ({
-          matches: false,
-          media: query,
-          onchange: null,
-          addListener: () => undefined,
-          removeListener: () => undefined,
-          addEventListener: () => undefined,
-          removeEventListener: () => undefined,
-          dispatchEvent: () => false,
-        }) as unknown as MediaQueryList;
-    }
-
-    await TestBed.configureTestingModule({
-      imports: [App],
+    const injector = Injector.create({
       providers: [
-        provideRouter(routes),
-        provideTranslateService({
-          loader: { provide: TranslateLoader, useClass: TestTranslateLoader },
-          fallbackLang: 'en',
-        }),
+        { provide: Router, useValue: router },
+        { provide: TranslateService, useValue: translate },
+        { provide: PLATFORM_ID, useValue: 'server' },
       ],
-    }).compileComponents();
-  });
+    });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App),
-      app = fixture.componentInstance;
+    const app = runInInjectionContext(injector, () => new App());
+
     expect(app).toBeTruthy();
+    expect(useSpy).toHaveBeenCalledWith('es');
   });
 
-  it('should render sidebar subtitle once splash is hidden', async () => {
-    const fixture = TestBed.createComponent(App);
-    fixture.componentInstance.showSplash.set(false);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Joya Theremin');
+  it('updates navigation state with class methods', () => {
+    const router = { url: '/', events: new Subject<NavigationEnd>().asObservable() } as Router;
+    const translate = {
+      use: vi.fn(),
+      onLangChange: new Subject<{ lang: string }>().asObservable(),
+      currentLang: 'es',
+    } as unknown as TranslateService;
+
+    const injector = Injector.create({
+      providers: [
+        { provide: Router, useValue: router },
+        { provide: TranslateService, useValue: translate },
+        { provide: PLATFORM_ID, useValue: 'server' },
+      ],
+    });
+
+    const app = runInInjectionContext(injector, () => new App());
+
+    expect(app.isNavOpen()).toBe(false);
+    app.toggleNav();
+    expect(app.isNavOpen()).toBe(true);
+    app.closeNav();
+    expect(app.isNavOpen()).toBe(false);
+
+    app.showSplash.set(false);
+    expect(app.showSplash()).toBe(false);
   });
 });

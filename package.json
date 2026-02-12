@@ -14,6 +14,7 @@
     "prettier:fix": "prettier --write .",
     "prepare": "husky",
     "test:unit": "ng test --watch=false",
+    "test:coverage": "ng test --watch=false --coverage",
     "test:e2e": "playwright test",
     "test:axe": "playwright test --grep @axe",
     "check": "npm run lint && npm run test:unit && npm run build"
@@ -67,6 +68,7 @@
     "@tailwindcss/postcss": "^4.1.18",
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.3",
+    "@vitest/coverage-v8": "^4.0.18",
     "angular-eslint": "21.2.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
