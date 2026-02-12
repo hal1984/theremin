@@ -29,5 +29,13 @@ describe('SettingsStore', () => {
 
     expect(store.swapHands()).toBe(!initialSwap);
     expect(store.quantize()).toBe(!initialQuantize);
+    expect(store.swapHandsLabelKey()).toBe('COMMON.YES');
+    expect(store.quantizeLabelKey()).toBe('COMMON.NO');
+  });
+
+  it('sets volume curve', () => {
+    const store = TestBed.inject(SettingsStore);
+    store.setVolumeCurve('linear');
+    expect(store.volumeCurve()).toBe('linear');
   });
 });

@@ -79,4 +79,31 @@ describe('RecordingsStore', () => {
     expect(objectUrl.revoke).toHaveBeenCalledWith('blob:1');
     expect(repository.remove).toHaveBeenCalledWith('1');
   });
+
+  it('selects and clears recordings with object-url revoke', () => {
+    repository.put.mockResolvedValue(undefined);
+    repository.clear.mockResolvedValue(undefined);
+
+    const store = TestBed.inject(RecordingsStore);
+    store.add(
+      {
+        id: '1',
+        title: 'Session',
+        durationSeconds: 3,
+        createdAtLabel: 'Today',
+        createdAtMs: 10,
+        audioUrl: 'blob:1',
+        mimeType: 'audio/webm',
+      },
+      new Blob(['a']),
+    );
+    store.select('1');
+    expect(store.selectedId()).toBe('1');
+    expect(store.selected()?.id).toBe('1');
+
+    store.clear();
+    expect(objectUrl.revoke).toHaveBeenCalledWith('blob:1');
+    expect(repository.clear).toHaveBeenCalledTimes(1);
+    expect(store.isEmpty()).toBe(true);
+  });
 });
